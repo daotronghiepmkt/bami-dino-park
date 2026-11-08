@@ -176,6 +176,7 @@ body.inplay header .title{display:none}
 .setrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:18px;gap:10px}
 .setrow .brick{font-size:16px;padding:8px 12px}
 </style>
+<link rel="stylesheet" href="css/v2.css?v=2">
 </head>
 <body>
 <div id="app">
@@ -184,6 +185,7 @@ body.inplay header .title{display:none}
     <button class="hbtn pchip" id="hPlayer" onclick="go('start')"></button>
     <div class="title">Bami's Dino Park</div>
     <div class="hbtn" id="hStars">⭐ 0</div>
+    <div class="hbtn" id="hCoins">🪙 0</div>
     <button class="hbtn" id="hGear">⚙️</button>
   </header>
   <div id="main"></div>
@@ -381,7 +383,7 @@ function go(name,arg){ SFX.click(); stopLoops(); screen=name; render(arg) }
 function goHome(){ go(P?'park':'start') }
 function render(arg){
   updateHeader(); const m=$('#main'); m.innerHTML=''; m.scrollTop=0;
-  ({start:rStart,newPlayer:rNewPlayer,park:rPark,adopt:rAdopt,dress:rDress,care:rCare,battle:rBattle,family:rFamily,truck:rTruck,bye:rBye})[screen](m,arg);
+  ((window.SCREENS&&SCREENS[screen])||({start:rStart,newPlayer:rNewPlayer,park:rPark,adopt:rAdopt,dress:rDress,care:rCare,battle:rBattle,family:rFamily,truck:rTruck,bye:rBye})[screen])(m,arg);
 }
 function emptyState(m,msg){ m.innerHTML=`<div class="empty"><div class="e">🥚</div><p>${msg}</p><button class="brick" style="--c:#FFCD03;--t:#222" onclick="go('adopt')">🥚 Get a dino</button></div>`; say(msg) }
 function picker(){ return `<div class="picker" id="picker">${P.dinos.map(d=>`<div class="pick ${d.id===sel?'sel':''}" onclick="pickDino('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span></div>`).join('')}</div>` }
@@ -679,7 +681,11 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) save() })
 document.addEventListener('pointerdown',()=>{ try{ac()}catch(e){} },{once:true});
 document.addEventListener('dblclick',e=>e.preventDefault());
 const _render=render; render=function(a){ $('#main').style.overflow=''; _render(a) };
-render();
 </script>
+<script src="js/core2.js?v=2"></script>
+<script src="js/battle2.js?v=2"></script>
+<script src="js/trip2.js?v=2"></script>
+<script src="js/guard.js?v=2"></script>
+<script src="js/screens2.js?v=2"></script>
 </body>
 </html>
