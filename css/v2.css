@@ -246,3 +246,8 @@
 .dbub{width:max-content;max-width:min(230px,78vw)}
 .quake{animation:quake .45s}
 @keyframes quake{20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(4px,-2px)}}
+.corner{cursor:pointer;border:4px solid transparent;transition:transform .15s}
+.corner.act{border-color:#FFCD03;box-shadow:0 0 0 3px #fff,0 0 18px #FFCD03;transform:scale(1.04)}
+.pickme{font-size:15px;line-height:1.4}
+.fd.selA{border-color:#00A84F;box-shadow:0 0 0 3px #b6f0c4}
+.fd.selB{border-color:#E3000B;box-shadow:0 0 0 3px #ffc2c5}

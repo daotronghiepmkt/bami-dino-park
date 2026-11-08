@@ -37,16 +37,16 @@ const MUS={
 let musBus=null,musTrack='park',musStep=0,musNext=0,musTimer=null;
 const mtof=n=>440*Math.pow(2,(n-69)/12);
 function musNote(f,t,dur,type,vol){ const a=AC,o=a.createOscillator(),g=a.createGain(); o.type=type; o.frequency.value=f; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+dur); o.connect(g).connect(musBus); o.start(t); o.stop(t+dur+.02) }
-function musHit(t,kick){ const a=AC; if(kick){ const o=a.createOscillator(),g=a.createGain(); o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(45,t+.12); g.gain.setValueAtTime(.22,t); g.gain.exponentialRampToValueAtTime(.0001,t+.15); o.connect(g).connect(musBus); o.start(t); o.stop(t+.16) }
-  else { const len=Math.floor(a.sampleRate*.04),b=a.createBuffer(1,len,a.sampleRate),ch=b.getChannelData(0); for(let i=0;i<len;i++) ch[i]=Math.random()*2-1; const s=a.createBufferSource(); s.buffer=b; const fl=a.createBiquadFilter(); fl.type='highpass'; fl.frequency.value=7000; const g=a.createGain(); g.gain.setValueAtTime(.05,t); g.gain.exponentialRampToValueAtTime(.0001,t+.04); s.connect(fl).connect(g).connect(musBus); s.start(t) } }
+function musHit(t,kick){ const a=AC; if(kick){ const o=a.createOscillator(),g=a.createGain(); o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(45,t+.12); g.gain.setValueAtTime(.4,t); g.gain.exponentialRampToValueAtTime(.0001,t+.15); o.connect(g).connect(musBus); o.start(t); o.stop(t+.16) }
+  else { const len=Math.floor(a.sampleRate*.04),b=a.createBuffer(1,len,a.sampleRate),ch=b.getChannelData(0); for(let i=0;i<len;i++) ch[i]=Math.random()*2-1; const s=a.createBufferSource(); s.buffer=b; const fl=a.createBiquadFilter(); fl.type='highpass'; fl.frequency.value=7000; const g=a.createGain(); g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.0001,t+.04); s.connect(fl).connect(g).connect(musBus); s.start(t) } }
 function musTick(){ if(!AC||!musTrack||!musBus) return; const tr=MUS[musTrack],st=60/tr.bpm/2;
   if(musNext<AC.currentTime) musNext=AC.currentTime+.05;
   while(musNext<AC.currentTime+.3){ const i=musStep%tr.mel.length,n=tr.mel[i];
-    if(n){ musNote(mtof(n),musNext,st*.85,'square',.04); musNote(mtof(n+12),musNext,st*.5,'triangle',.015) }
-    if(i%2===0) musNote(mtof(tr.bass[(i/2|0)%tr.bass.length]),musNext,st*1.7,'triangle',.09);
+    if(n){ musNote(mtof(n),musNext,st*.85,'square',.11); musNote(mtof(n+12),musNext,st*.5,'triangle',.05) }
+    if(i%2===0) musNote(mtof(tr.bass[(i/2|0)%tr.bass.length]),musNext,st*1.7,'triangle',.22);
     if(tr.drum){ if(i%4===0) musHit(musNext,1); if(i%2===1) musHit(musNext,0) } else if(i%8===0) musHit(musNext,1);
     musNext+=st; musStep++ } }
-function startMus(){ if(musTimer||!musTrack||!DB.settings.music||document.hidden) return; try{ ac() }catch(e){ return } if(!musBus){ musBus=AC.createGain(); musBus.gain.value=.6; musBus.connect(AC.destination) } musNext=AC.currentTime+.1; musTimer=setInterval(musTick,70) }
+function startMus(){ if(musTimer||!musTrack||!DB.settings.music||document.hidden) return; try{ ac() }catch(e){ return } if(!musBus){ musBus=AC.createGain(); musBus.gain.value=.8; musBus.connect(AC.destination) } musNext=AC.currentTime+.1; musTimer=setInterval(musTick,70) }
 function stopMus(){ clearInterval(musTimer); musTimer=null }
 function setMusic(name){ if(name===musTrack&&musTimer) return; musTrack=name; musStep=0; stopMus(); if(AC) startMus() }
 DB.settings.music=DB.settings.music!==false;
@@ -106,3 +106,27 @@ window.gPlace=(o=>function(r,c){ const n=GD?GD.units.length:0; o(r,c); if(!GD||G
 function gSpecial(i){ const G=GD; if(!G||G.over) return; const c=G.cards[i]; if(!c||!c.unit||c.sp<100) return; c.sp=0; c.unit.el.classList.remove('ready'); gCards(true);
   const sp=skS(c.d.sk.sp),u=c.unit; SFX.vip(); bubble(u.el,sp.e,''); gMsg(`${sp.e} ${sp.n}!`); say(`${c.d.name}! ${sp.n}!`); const f=$('#gf'); if(f){ const fl=document.createElement('div'); fl.className='flash y'; f.appendChild(fl); setTimeout(()=>fl.remove(),450) }
   setTimeout(()=>gApply(u,sp,'Great'),350) }
+
+/* ---------- battle picker: tap "You" / "Computer" box, then tap a dino ---------- */
+function rBattle(m){
+  if(P.dinos.length<2) return emptyState(m,'You need two dinos to play battle!');
+  P.dinos.forEach(ensureDino);
+  if(B.a&&!getD(B.a)) B.a=null; if(B.b&&!getD(B.b)) B.b=null; if(B.a===B.b) B.b=null;
+  if(!B.init){ B.init=true; if(!B.a&&getD(sel)) B.a=sel }
+  if(!B.slot) B.slot=B.a?'b':'a';
+  const who=B.mode==='cpu'?'Computer':'Friend';
+  const slot=(id,flip)=>{const d=getD(id); if(!d) return '<div class="pickme">❓<br>Tap a dino 👇</div>'; return `<div style="${flip?'transform:scaleX(-1)':''}">${dinoSVG(d)}</div><span>${esc(d.name)}</span><div class="skrow">${skIcons(d)}</div>`};
+  m.innerHTML=`<div class="corners"><div class="corner ${B.slot==='a'?'act':''}" style="background:#00A84F" onclick="bSlot('a')">🟢 You<div class="slot">${slot(B.a)}</div></div><div class="vs">VS</div><div class="corner ${B.slot==='b'?'act':''}" style="background:#E3000B" onclick="bSlot('b')">🔴 ${who}<div class="slot">${slot(B.b,1)}</div></div></div>
+   <div class="hint">👆 Pick a dino for <b>${B.slot==='a'?'🟢 You':'🔴 '+who}</b>. Tap a box above to change it.</div>
+   <div class="row"><button class="brick" style="--c:${B.mode==='cpu'?'#0057A6':'#9BA19D'}" onclick="B.mode='cpu';say('Play with the computer');render()">🤖 vs Computer</button><button class="brick" style="--c:${B.mode==='2p'?'#0057A6':'#9BA19D'}" onclick="B.mode='2p';say('Two players');render()">👫 2 Players</button></div>
+   <div class="fdinos" style="padding:8px">${P.dinos.map(d=>`<div class="fd ${d.id===B.a?'selA':''} ${d.id===B.b?'selB':''}" onclick="bPick('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span><span class="mini">🏆${d.st.w}</span></div>`).join('')}</div>
+   <div class="row" style="padding-bottom:24px"><button class="brick" style="--c:#E3000B;font-size:28px;padding:14px 26px" ${B.a&&B.b?'':'disabled'} onclick="startFight()">💥 BATTLE!</button><button class="brick" style="--c:#b38f00;font-size:20px" onclick="go('rank')">🏆 Ranking</button></div>`;
+}
+function bSlot(s){ B.slot=s; SFX.click(); say(s==='a'?'Pick your dino!':`Pick a dino for the ${B.mode==='cpu'?'computer':'friend'}!`); keepScroll(()=>render()) }
+function bPick(id){
+  const d=getD(id),s=B.slot||'a',o=s==='a'?'b':'a';
+  if(B[o]===id) B[o]=B[s]; B[s]=id; SFX.roar(d); say(d.name);
+  if(s==='a') B.slot='b';
+  keepScroll(()=>render());
+  if(B.a&&B.b) say(`${getD(B.a).name} versus ${getD(B.b).name}! Press battle!`,700);
+}
