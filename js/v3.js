@@ -42,14 +42,14 @@ function musHit(t,kick){ const a=AC; if(kick){ const o=a.createOscillator(),g=a.
 function musTick(){ if(!AC||!musTrack||!musBus) return; const tr=MUS[musTrack],st=60/tr.bpm/2;
   if(musNext<AC.currentTime) musNext=AC.currentTime+.05;
   while(musNext<AC.currentTime+.3){ const i=musStep%tr.mel.length,n=tr.mel[i];
-    if(n){ musNote(mtof(n),musNext,st*.85,'square',.11); musNote(mtof(n+12),musNext,st*.5,'triangle',.05) }
-    if(i%2===0) musNote(mtof(tr.bass[(i/2|0)%tr.bass.length]),musNext,st*1.7,'triangle',.22);
+    if(n){ musNote(mtof(n),musNext,st*.85,'square',.16); musNote(mtof(n+12),musNext,st*.5,'triangle',.09) }
+    if(i%2===0) musNote(mtof(tr.bass[(i/2|0)%tr.bass.length]+12),musNext,st*1.7,'triangle',.3); musNote(mtof(tr.bass[(i/2|0)%tr.bass.length]+24),musNext,st*.6,'square',.05);
     if(tr.drum){ if(i%4===0) musHit(musNext,1); if(i%2===1) musHit(musNext,0) } else if(i%8===0) musHit(musNext,1);
     musNext+=st; musStep++ } }
-function startMus(){ if(musTimer||!musTrack||!DB.settings.music||document.hidden) return; try{ ac() }catch(e){ return } if(!musBus){ musBus=AC.createGain(); musBus.gain.value=.8; musBus.connect(AC.destination) } musNext=AC.currentTime+.1; musTimer=setInterval(musTick,70) }
+function startMus(){ if(musTimer||!musTrack||!DB.settings.music||document.hidden) return; try{ ac() }catch(e){ return } if(!musBus){ musBus=AC.createGain(); const cp=AC.createDynamicsCompressor(); cp.threshold.value=-20; cp.ratio.value=4; musBus.connect(cp).connect(AC.destination) } musBus.gain.value=DB.settings.mvol; musNext=AC.currentTime+.1; musTimer=setInterval(musTick,70) }
 function stopMus(){ clearInterval(musTimer); musTimer=null }
 function setMusic(name){ if(name===musTrack&&musTimer) return; musTrack=name; musStep=0; stopMus(); if(AC) startMus() }
-DB.settings.music=DB.settings.music!==false;
+DB.settings.music=DB.settings.music!==false; if(!DB.settings.mvol) DB.settings.mvol=1.3;
 document.addEventListener('pointerdown',()=>{ if(!musTimer) startMus() });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) stopMus(); else startMus() });
 const renderV2=render; render=function(a){ renderV2(a); setMusic({battle:'battle',rank:'battle',guard:'guard'}[screen]||'park') };
@@ -57,7 +57,7 @@ window.drive=(o=>function(k){ o(k); if(RN) setMusic('drive') })(window.drive);
 
 function openSettings(){
   const s=DB.settings,row=(ic,l,k)=>`<div class="setrow">${ic} ${l} <button class="brick" style="--c:${s[k]?'#00A84F':'#9BA19D'}" onclick="DB.settings.${k}=!DB.settings.${k};save();${k==='music'?'DB.settings.music?startMus():stopMus();':''}openSettings()">${s[k]?'ON':'OFF'}</button></div>`;
-  showCard(`<h2>⚙️ Grown-ups</h2>${row('🎵','Music','music')}${row('🔊','Sounds','sound')}${row('🗣️','Voice','voice')}
+  showCard(`<h2>⚙️ Grown-ups</h2>${row('🎵','Music','music')}<div class="setrow">🔊 Music volume <span>${[['🔈',.7],['🔉',1],['🔊',1.3],['📢',1.8]].map(([ic,v])=>`<button class="brick" style="--c:${s.mvol===v?'#00A84F':'#9BA19D'};padding:6px 10px" onclick="DB.settings.mvol=${v};save();if(musBus)musBus.gain.value=${v};openSettings()">${ic}</button>`).join('')}</span></div>${row('🔊','Sounds','sound')}${row('🗣️','Voice','voice')}
    <div class="setrow">💾 Backup all players <button class="brick" style="--c:#0057A6" onclick="backup()">Save file</button></div>
    <div class="setrow">📂 Restore backup <button class="brick" style="--c:#0057A6" onclick="$('#rf').click()">Open file</button><input type="file" id="rf" accept=".json,application/json" style="display:none" onchange="restore(this)"></div>
    ${P?`<div class="setrow">🗑️ Delete player "${esc(P.name)}" <button class="brick" style="--c:#E3000B" onclick="delPlayer()">Delete</button></div>`:''}
