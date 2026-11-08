@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dino Park">
+<meta name="theme-color" content="#FFCD03">
+<title>Bami's Dino Park</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦖</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#FFCD03;font-family:'Fredoka','Arial Rounded MT Bold','Trebuchet MS',sans-serif;color:#222}
+#app{max-width:1000px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;background:#fff8dc;position:relative;overflow:hidden}
+header{display:flex;align-items:center;gap:6px;padding:8px;padding-top:max(8px,env(safe-area-inset-top));background:#FFCD03;border-bottom:6px solid #e0a800;z-index:5}
+header .title{flex:1;min-width:0;font-weight:700;font-size:19px;text-align:center;color:#c1121f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbtn{font-size:20px;background:#fff;border:none;border-radius:12px;min-width:44px;height:44px;box-shadow:0 4px 0 rgba(0,0,0,.2);font-family:inherit;font-weight:700;padding:0 10px;color:#222;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.hbtn:active{transform:translateY(2px)}
+.pchip{max-width:120px;overflow:hidden;text-overflow:ellipsis;font-size:16px}
+#main{flex:1;position:relative;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.brick{--c:#E3000B;--t:#fff;position:relative;background:var(--c);color:var(--t);border:none;border-radius:10px;font-family:inherit;font-weight:700;font-size:20px;padding:12px 16px;margin-top:10px;cursor:pointer;box-shadow:inset 0 -6px 0 rgba(0,0,0,.22),inset 0 3px 0 rgba(255,255,255,.3),0 4px 0 rgba(0,0,0,.18);transition:transform .08s}
+.brick::before{content:'';position:absolute;left:8px;right:8px;top:-8px;height:9px;background:radial-gradient(ellipse 8px 5px at 50% 72%,var(--c) 90%,transparent 100%) 0 0/24px 9px repeat-x;filter:brightness(1.1)}
+.brick:active{transform:translateY(3px) scale(.97)}
+.brick[disabled]{opacity:.4}
+.brick small{font-size:14px;opacity:.9;margin-left:6px}
+.center{text-align:center}.pad{padding:14px}
+h1.big{font-size:34px;margin:6px 0;color:#c1121f;text-shadow:0 3px 0 #FFCD03}
+h2{margin:10px 0;font-size:26px;text-align:center}
+.sub{font-size:20px;margin:4px 0 10px}
+.logo{width:180px;margin:0 auto}
+.players{display:flex;flex-direction:column;gap:6px;max-width:420px;margin:0 auto}
+.players .brick{font-size:24px;padding:16px}
+input.name{font-family:inherit;font-size:28px;padding:12px;border-radius:12px;border:4px solid #0057A6;width:100%;max-width:360px;text-align:center;user-select:text;-webkit-user-select:text}
+.sw{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px}
+.sw button{width:48px;height:48px;border-radius:10px;border:3px solid rgba(0,0,0,.25);box-shadow:0 3px 0 rgba(0,0,0,.2);position:relative}
+.sw button.sel{outline:5px solid #222;outline-offset:2px}
+.col{display:flex;flex-direction:column;height:100%}
+.scene{position:relative;flex:1;min-height:300px;overflow:hidden;background:linear-gradient(#8fd3ff,#d4f0ff 34%,transparent 34%)}
+.ground,.baseplate{background-color:#3DAE4A;background-image:radial-gradient(circle,rgba(255,255,255,.22) 0 4px,rgba(0,0,0,.13) 4.5px 6px,transparent 6.5px);background-size:22px 22px}
+.ground{position:absolute;left:0;right:0;bottom:0;top:34%}
+.deco{position:absolute;pointer-events:none;line-height:1}
+.cloud{animation:drift 40s linear infinite}
+@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(110vw)}}
+.walker{position:absolute;transform:translateX(-50%);cursor:pointer}
+.walker .inner svg{animation:bob .45s infinite alternate ease-in-out}
+@keyframes bob{to{transform:translateY(-5px)}}
+.menu{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 8px;padding:6px 8px 10px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:#FFCD03;border-top:6px solid #e0a800}
+.menu .brick{display:flex;flex-direction:column;align-items:center;font-size:15px;padding:6px 2px 8px;line-height:1.1}
+.menu .ic{font-size:32px;line-height:1.15}
+body.inplay header .title{display:none}
+@media(min-width:560px){body.inplay header .title{display:block}}
+@media(min-width:700px){.menu{grid-template-columns:repeat(7,1fr)}}
+.dsvg{width:100%;display:block;margin:0 auto;overflow:visible}
+.dsvg.baby{width:66%}
+.picker{display:flex;gap:8px;overflow-x:auto;padding:8px 8px 4px;background:#fff3c4;border-bottom:4px solid #f0d77a}
+.pick{flex:0 0 auto;width:82px;background:#fff;border-radius:12px;border:4px solid transparent;padding:4px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;min-height:84px}
+.pick.sel{border-color:#E3000B;background:#fffbe6}
+.pick span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage{position:relative;text-align:center;padding:10px 0 0;transition:background .5s;border-radius:0 0 30px 30px}
+.stage.night{background:#1d2b5a}
+.bigwrap{width:min(62vw,280px);margin:0 auto;cursor:pointer}
+.dname{font-size:28px;font-weight:700;margin:2px 0 6px}
+.dkind{font-size:16px;color:#666;margin-top:-6px}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;padding:6px 16px;max-width:520px;margin:0 auto}
+.meter{display:flex;align-items:center;gap:6px}
+.meter .mi{font-size:26px;width:32px}
+.mbar{display:flex;gap:3px;flex:1}
+.mbar i{flex:1;height:18px;border-radius:4px;background:#ddd;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.mbar.g i.on{background:#00A84F}.mbar.y i.on{background:#FFCD03}.mbar.r i.on{background:#E3000B}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 8px;padding:4px 10px 16px;max-width:600px;margin:0 auto}
+.acts .brick{display:flex;flex-direction:column;align-items:center;font-size:15px;padding:6px 2px 8px}
+.acts .ic{font-size:32px}
+.tabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:4px 8px}
+.tabs .brick{font-size:16px;padding:8px 10px;--c:#9BA19D}
+.tabs .brick.on{--c:#0057A6}
+.panel{padding:6px 10px 20px;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:center}
+.chips .brick{font-size:18px;padding:8px 12px}
+.chips .brick.on{outline:4px solid #222}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:10px}
+.tile{background:#fff;border:4px solid #FFCD03;border-radius:16px;padding:8px;font-family:inherit;font-size:17px;box-shadow:0 4px 0 rgba(0,0,0,.15);cursor:pointer}
+.tile:active{transform:scale(.96)}
+.tile b{display:block;margin-top:4px}
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:100;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.card{background:#fff;border-radius:20px;padding:16px;width:min(92%,420px);text-align:center;border:6px solid #FFCD03;max-height:92%;overflow:auto}
+.card .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:4px 8px}
+.bigtext{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-size:60px;font-weight:700;color:#fff;-webkit-text-stroke:3px #222;paint-order:stroke fill;pointer-events:none;animation:popt 1.1s forwards;z-index:150;white-space:nowrap}
+@keyframes popt{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}20%{transform:translate(-50%,-50%) scale(1.2);opacity:1}75%{opacity:1}100%{transform:translate(-50%,-110%) scale(1);opacity:0}}
+.pt{position:absolute;font-size:34px;pointer-events:none;animation:floatup 1.5s forwards;z-index:140;opacity:0}
+@keyframes floatup{0%{opacity:1}100%{transform:translate(var(--dx),-170px) scale(1.4);opacity:0}}
+.jump{animation:jump .6s}
+@keyframes jump{30%{transform:translateY(-50px) rotate(-6deg)}60%{transform:translateY(0) scaleY(.88)}80%{transform:translateY(-8px)}}
+.shake{animation:shake .45s}
+@keyframes shake{20%{transform:rotate(-6deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(4deg)}}
+.munch{animation:munch .6s}
+@keyframes munch{25%,75%{transform:scale(1.08,.94)}50%{transform:scale(.96,1.05)}}
+.hopin{animation:hopin .5s}
+@keyframes hopin{0%{transform:translateY(-120px) scale(.4)}70%{transform:translateY(8px)}}
+.egg{font-size:150px;cursor:pointer;display:inline-block;line-height:1}
+.egg.wob{animation:shake .4s}
+.hatched{animation:hatch .7s}
+@keyframes hatch{0%{transform:scale(0) rotate(-20deg)}70%{transform:scale(1.15)}}
+.empty{text-align:center;padding:30px 16px;font-size:22px}
+.empty .e{font-size:90px}
+/* battle */
+.corners{display:flex;gap:10px;padding:8px;justify-content:center}
+.corner{flex:1;max-width:220px;border-radius:16px;padding:6px;text-align:center;font-weight:700;font-size:18px;color:#fff;min-height:150px}
+.corner .slot{background:rgba(255,255,255,.85);border-radius:12px;min-height:100px;margin-top:4px;color:#222;display:flex;flex-direction:column;justify-content:center;font-size:15px}
+.vs{align-self:center;font-size:34px;font-weight:700;color:#E3000B}
+.arena{position:relative;height:min(52vh,360px);overflow:hidden;background:linear-gradient(#ffb36b,#ffe0a3 45%,transparent 45%)}
+.arena .ground{top:45%}
+.fighter{position:absolute;bottom:12%;width:34%;transition:left .08s linear}
+.flipX .inner{transform:scaleX(-1)}
+.lunge-r{animation:lr .18s}.lunge-l{animation:ll .18s}
+@keyframes lr{50%{transform:translateX(14px) rotate(4deg)}}
+@keyframes ll{50%{transform:translateX(-14px) rotate(-4deg)}}
+.flyout-r{animation:fr 1.2s forwards}.flyout-l{animation:fl 1.2s forwards}
+@keyframes fr{to{transform:translate(160%,-160%) rotate(540deg);opacity:0}}
+@keyframes fl{to{transform:translate(-160%,-160%) rotate(-540deg);opacity:0}}
+.pbar{position:absolute;top:10px;left:8%;right:8%;height:22px;border-radius:12px;background:#E3000B;overflow:hidden;border:4px solid #fff;box-shadow:0 3px 0 rgba(0,0,0,.2);z-index:3}
+.pbar div{height:100%;background:#00A84F;width:50%;transition:width .08s}
+.count{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:90px;font-weight:700;color:#fff;-webkit-text-stroke:4px #222;paint-order:stroke fill;z-index:5;pointer-events:none}
+.fightbtns{display:flex;gap:10px;padding:8px 10px 20px}
+.tapbtn{flex:1;font-size:30px;padding:26px 6px;touch-action:manipulation}
+/* family */
+.hint{text-align:center;font-size:19px;padding:8px;background:#fff3c4}
+.wild{margin:8px;border-radius:16px;padding:6px;border:4px dashed #3DAE4A;background:#eaf8e6;min-height:110px}
+.lbl{font-weight:700;font-size:18px;padding:2px 6px;display:flex;align-items:center;gap:6px;justify-content:center}
+.fdinos{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:4px}
+.fd{width:76px;background:#fff;border-radius:10px;border:4px solid transparent;padding:3px;text-align:center;font-size:12px;font-weight:700;cursor:pointer}
+.fd span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fd.sel{border-color:#E3000B;transform:scale(1.08);box-shadow:0 0 0 4px #FFCD03}
+.houses{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;padding:8px}
+.house{cursor:pointer}
+.roof{height:46px;background:var(--c);clip-path:polygon(50% 0,100% 100%,0 100%);margin:0 -6px}
+.hbody{background:#fff;border:6px solid var(--c);border-top:none;border-radius:0 0 14px 14px;min-height:110px}
+.x{border:none;background:#eee;border-radius:8px;font-size:14px;padding:4px 8px;font-family:inherit}
+/* truck */
+.tscene{position:relative;height:min(60vh,430px);overflow:hidden;transition:background .6s}
+.tscene .ground{top:62%}
+.fieldd{position:absolute;width:18%;cursor:pointer}
+.fieldd svg{animation:bob .5s infinite alternate}
+.truck{position:absolute;left:3%;bottom:4%;width:min(90%,480px)}
+.truck .tsvg{width:100%;display:block}
+.seat{position:absolute;width:25%}
+.driveout{animation:dout 1.6s ease-in forwards}
+@keyframes dout{20%{transform:translateX(-4%)}100%{transform:translateX(160%)}}
+.drivein{animation:din 1.8s ease-out}
+@keyframes din{0%{transform:translateX(-160%)}85%{transform:translateX(3%)}}
+.truck.rumble .tsvg{animation:rum .12s infinite}
+@keyframes rum{50%{transform:translateY(-2px)}}
+.walkaway{animation:wa 2.2s ease-in forwards}
+@keyframes wa{to{transform:translateX(120%) scale(.3);opacity:0}}
+.gear-hint{position:absolute;top:60px;right:8px;background:#222;color:#fff;padding:8px 10px;border-radius:10px;font-size:14px;z-index:200}
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:18px;gap:10px}
+.setrow .brick{font-size:16px;padding:8px 12px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <button class="hbtn" id="hHome" onclick="goHome()">🏠</button>
+    <button class="hbtn pchip" id="hPlayer" onclick="go('start')"></button>
+    <div class="title">Bami's Dino Park</div>
+    <div class="hbtn" id="hStars">⭐ 0</div>
+    <button class="hbtn" id="hGear">⚙️</button>
+  </header>
+  <div id="main"></div>
+</div>
+<script>
+/* ============ DATA ============ */
+const KEY='bamiDinoPark.v1';
+const COLORS=[['Red','#E3000B'],['Orange','#F57D20'],['Yellow','#FFCD03'],['Green','#00A84F'],['Lime','#A5CA18'],['Blue','#0057A6'],['Sky blue','#5AB4E5'],['Purple','#8E4FB5'],['Pink','#F49AC1'],['Brown','#8B5A2B'],['Gray','#9BA19D'],['Black','#2A2A2A'],['White','#F4F4F4']];
+const NAMES=['Rexy','Spike','Trixie','Lulu','Zippy','Rocky','Coco','Momo','Bubbles','Sunny','Tiny','Max','Leo','Kiki','Pip','Bobo','Dino','Chomp','Stompy','Mimi','Nana','Toto','Biscuit','Mango'];
+// blocks: [x,y,w,h,role,studs] role b=body l=belly a=accent w=white
+const SP={
+ trex:{name:'T-Rex',diet:['meat'],c:'#00A84F',a:'#8E4FB5',p:'stripes',pitch:1,eye:[84,10],hat:[80,6],blocks:[
+  [0,40,30,10,'b',1],[25,30,40,28,'b',1],[30,46,30,12,'l'],[32,58,10,22,'b'],[28,80,16,6,'b'],[50,58,10,22,'b'],[46,80,16,6,'b'],[58,20,14,22,'b'],[64,6,36,18,'b',1],[76,24,3,3,'w'],[83,24,3,3,'w'],[90,24,3,3,'w'],[72,27,26,6,'b'],[66,40,12,5,'b']]},
+ stego:{name:'Stegosaurus',diet:['leaves'],c:'#A5CA18',a:'#F57D20',p:'none',pitch:1.15,eye:[94,47],hat:[92,44],blocks:[
+  [2,42,4,8,'a'],[12,42,4,8,'a'],[30,24,10,14,'a',1],[44,16,12,22,'a',1],[60,22,10,16,'a',1],[0,50,30,9,'b',1],[26,36,54,26,'b',1],[30,50,46,12,'l'],[74,42,12,14,'b'],[82,44,22,13,'b',1],[32,62,10,18,'b'],[28,80,16,6,'b'],[64,62,10,18,'b'],[60,80,16,6,'b']]},
+ trike:{name:'Triceratops',diet:['leaves'],c:'#F57D20',a:'#FFCD03',p:'spots',pitch:1.1,eye:[88,41],hat:[88,36],blocks:[
+  [0,48,22,10,'b',1],[18,36,56,28,'b',1],[22,52,48,12,'l'],[70,20,12,32,'a',1],[78,36,28,20,'b',1],[96,28,18,4,'w'],[104,42,8,4,'w'],[24,64,12,16,'b'],[20,80,18,6,'b'],[56,64,12,16,'b'],[52,80,18,6,'b']]},
+ brachio:{name:'Brachiosaurus',diet:['leaves'],c:'#5AB4E5',a:'#0057A6',p:'spots',pitch:.7,eye:[78,5],hat:[72,2],blocks:[
+  [0,54,26,10,'b',1],[20,44,52,24,'b',1],[24,58,44,10,'l'],[62,14,12,34,'b'],[60,2,28,13,'b',1],[26,68,12,14,'b'],[22,80,18,6,'b'],[54,68,12,14,'b'],[50,80,18,6,'b'],[66,24,8,4,'a'],[66,32,8,4,'a']]},
+ raptor:{name:'Raptor',diet:['meat'],c:'#F57D20',a:'#8B5A2B',p:'stripes',pitch:1.8,eye:[80,12],hat:[76,10],blocks:[
+  [0,28,40,8,'b',1],[36,22,6,4,'a'],[46,22,6,4,'a'],[34,26,30,20,'b',1],[38,38,22,8,'l'],[58,18,10,16,'b'],[60,10,32,12,'b',1],[70,22,3,3,'w'],[77,22,3,3,'w'],[84,22,3,3,'w'],[66,25,22,5,'b'],[62,36,10,4,'b'],[70,36,3,6,'a'],[40,46,8,34,'b'],[36,80,16,6,'b'],[52,46,8,34,'b'],[50,80,16,6,'b']]},
+ ptero:{name:'Pterodactyl',diet:['fish'],c:'#E3000B',a:'#FFCD03',p:'none',pitch:2.4,fly:1,eye:[92,17],hat:[88,16],blocks:[
+  [2,30,44,8,'a',1],[74,30,44,8,'a',1],[10,38,30,4,'a'],[80,38,30,4,'a'],[70,10,16,8,'a',1],[40,28,38,16,'b',1],[44,38,30,6,'l'],[74,20,12,14,'b'],[78,16,28,10,'b',1],[104,19,10,4,'b'],[50,44,4,10,'b'],[64,44,4,10,'b']]},
+ anky:{name:'Ankylosaurus',diet:['leaves'],c:'#8B5A2B',a:'#FFCD03',p:'none',pitch:1.05,eye:[94,47],hat:[92,44],blocks:[
+  [0,44,10,16,'a',1],[8,48,14,8,'b'],[18,40,64,22,'b',1],[22,54,56,8,'l'],[22,32,10,8,'a',1],[38,32,10,8,'a',1],[54,32,10,8,'a',1],[70,34,8,6,'a',1],[80,44,24,14,'b',1],[24,62,12,18,'b'],[20,80,18,6,'b'],[62,62,12,18,'b'],[58,80,18,6,'b']]},
+ spino:{name:'Spinosaurus',diet:['fish','meat'],c:'#0057A6',a:'#E3000B',p:'none',pitch:.9,eye:[84,21],hat:[84,20],blocks:[
+  [30,14,8,22,'a',1],[38,8,10,28,'a',1],[48,12,10,24,'a',1],[58,22,6,14,'a',1],[0,44,30,10,'b',1],[26,34,42,26,'b',1],[30,48,34,12,'l'],[62,28,12,16,'b'],[68,20,40,10,'b',1],[80,30,3,2,'w'],[90,30,3,2,'w'],[72,32,34,5,'b'],[70,44,10,5,'b'],[34,60,10,20,'b'],[30,80,16,6,'b'],[52,60,10,20,'b'],[48,80,16,6,'b']]}
+};
+const HATS=[['none','❌','No hat'],['crown','👑','A crown'],['cap','🧢','A cap'],['bow','🎀','A bow'],['flower','🌸','A flower'],['party','🎉','A party hat'],['glasses','🕶️','Cool glasses']];
+
+let DB;
+try{DB=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){DB=null}
+if(!DB||!Array.isArray(DB.players)) DB={players:[],current:null,settings:{sound:true,voice:true}};
+DB.settings=Object.assign({sound:true,voice:true},DB.settings||{});
+let P=null;
+function save(){ if(P) P.lastSeen=Date.now(); try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){} }
+try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+
+/* ============ HELPERS ============ */
+const $=s=>document.querySelector(s);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp=v=>Math.max(0,Math.min(100,Math.round(v)));
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function shade(hex,amt){const n=parseInt(hex.slice(1),16);const f=c=>Math.max(0,Math.min(255,Math.round(amt<0?c*(1+amt):c+(255-c)*amt)));return '#'+[n>>16,(n>>8)&255,n&255].map(f).map(x=>x.toString(16).padStart(2,'0')).join('')}
+function lum(hex){const n=parseInt(hex.slice(1),16);return (0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255))/255}
+const txt=h=>lum(h)>.62?'#222':'#fff';
+const colorName=h=>(COLORS.find(c=>c[1]===h)||['Rainbow'])[0];
+function getD(id){return P&&P.dinos.find(d=>d.id===id)}
+let sel=null;
+function getSel(){ if(!P||!P.dinos.length) return null; let d=getD(sel); if(!d){d=P.dinos[0];sel=d.id} return d }
+function anim(el,cls,ms=650){ if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),ms) }
+
+/* ============ SOUND ============ */
+let AC=null;
+function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume(); return AC }
+function tone(f,dur=.15,type='sine',vol=.2,f2=null,delay=0){
+  if(!DB.settings.sound) return; try{
+  const a=ac(),t=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t); if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.05)}catch(e){} }
+function noise(dur=.3,vol=.2,ft='lowpass',f=1000,f2=null,delay=0){
+  if(!DB.settings.sound) return; try{
+  const a=ac(),t=a.currentTime+delay,len=Math.floor(a.sampleRate*dur),buf=a.createBuffer(1,len,a.sampleRate),ch=buf.getChannelData(0);
+  for(let i=0;i<len;i++) ch[i]=Math.random()*2-1;
+  const s=a.createBufferSource();s.buffer=buf;const fl=a.createBiquadFilter();fl.type=ft;fl.frequency.setValueAtTime(f,t); if(f2) fl.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  const g=a.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(fl).connect(g).connect(a.destination);s.start(t);s.stop(t+dur)}catch(e){} }
+const SFX={
+  click(){tone(700,.05,'square',.06)},
+  pop(){tone(420,.12,'sine',.25,950)},
+  star(){[784,988,1175,1568].forEach((f,i)=>tone(f,.16,'triangle',.18,null,i*.08))},
+  munch(){for(let i=0;i<3;i++){noise(.07,.35,'bandpass',1300,null,i*.15);tone(180,.06,'square',.06,120,i*.15)}},
+  yuck(){tone(320,.4,'sawtooth',.12,140);tone(330,.4,'square',.05,150)},
+  splash(){noise(.6,.3,'highpass',3500,700);for(let i=0;i<5;i++) tone(600+Math.random()*700,.08,'sine',.15,1400,.1+i*.09)},
+  snore(){tone(110,.9,'sawtooth',.07,85);noise(.9,.07,'lowpass',500,200);tone(300,.5,'sine',.08,600,1)},
+  boing(){tone(180,.4,'sine',.3,850)},
+  hug(){[523,659,784].forEach((f,i)=>tone(f,.2,'sine',.2,null,i*.12))},
+  honk(){tone(392,.16,'square',.12);tone(392,.26,'square',.12,null,.24)},
+  vroom(){tone(70,1.5,'sawtooth',.14,230);noise(1.3,.08,'lowpass',400,1600)},
+  bonk(){tone(160,.12,'square',.14,60);noise(.1,.2,'lowpass',1600)},
+  fanfare(){[523,659,784,1046].forEach((f,i)=>tone(f,i==3?.6:.16,'square',.09,null,i*.15))},
+  bye(){tone(784,.25,'triangle',.18,523);tone(659,.35,'triangle',.18,392,.25)},
+  crack(){noise(.08,.4,'highpass',2200);noise(.06,.3,'highpass',2800,null,.12)},
+  count(){tone(660,.18,'square',.1)},
+  go(){tone(990,.4,'square',.12)},
+  roar(d){const sp=SP[d.species];let p=(sp?sp.pitch:1)*(d.size==='baby'?1.9:1);
+    if(d.species==='ptero'){tone(900,.35,'sawtooth',.12,1500);tone(1500,.3,'square',.05,700,.25);return}
+    tone(160*p,.6,'sawtooth',.16,62*p);tone(172*p,.6,'square',.05,70*p);noise(.55,.24,'lowpass',950*p,200*p)}
+};
+let voice=null;
+function pickVoice(){ if(!window.speechSynthesis) return; const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang)); voice=vs.find(v=>/Samantha|Google US English|Aria|Jenny|Zira/i.test(v.name))||vs[0]||null }
+if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function say(t,delay=0){ if(!DB.settings.voice||!window.speechSynthesis) return; const go=()=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.85;u.pitch=1.25;if(voice)u.voice=voice;speechSynthesis.speak(u)}catch(e){}}; delay?setTimeout(go,delay):go() }
+
+/* ============ EFFECTS ============ */
+function bigText(t,color){const e=document.createElement('div');e.className='bigtext';e.textContent=t;if(color)e.style.color=color;$('#app').appendChild(e);setTimeout(()=>e.remove(),1200)}
+function burst(em,n=6,x=50,y=45){const app=$('#app');for(let i=0;i<n;i++){const s=document.createElement('div');s.className='pt';s.textContent=Array.isArray(em)?em[i%em.length]:em;s.style.left=(x+Math.random()*30-15)+'%';s.style.top=(y+Math.random()*20-10)+'%';s.style.setProperty('--dx',(Math.random()*140-70)+'px');s.style.animationDelay=(i*.07)+'s';app.appendChild(s);setTimeout(()=>s.remove(),2300)}}
+function confetti(){burst(['🎉','⭐','🎊','✨','🦖'],16,50,40)}
+function addStar(n=1){ if(!P) return; P.stars+=n; save(); updateHeader(); setTimeout(()=>{SFX.star();burst('⭐',5,85,8)},300) }
+
+/* ============ DINO DRAWING (brick style) ============ */
+let svgN=0;
+function dinoSVG(d,o={}){
+  const sp=SP[d.species]; if(!sp) return '';
+  const C={b:d.color,l:shade(d.color,.35),a:d.accent,w:'#fff'};
+  let s='';
+  for(const [x,y,w,h,r,st] of sp.blocks){
+    const f=C[r]||d.color, k=shade(f,-.35);
+    if(st){ for(let i=x+3;i+4<=x+w-1;i+=7) s+=`<rect x="${i}" y="${y-2.6}" width="4.2" height="3.2" rx=".8" fill="${f}" stroke="${k}" stroke-width=".7"/>` }
+    s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.6" fill="${f}" stroke="${k}" stroke-width="1"/>`;
+    if(w>5&&h>5) s+=`<rect x="${x+1.2}" y="${y+1.2}" width="${w-2.4}" height="1.6" rx=".8" fill="#fff" opacity=".28"/>`;
+    if(r==='b'&&w*h>=500&&d.pattern!=='none'){
+      if(d.pattern==='spots'){ for(let k2=0,px=x+5;px+5<=x+w-3;px+=11,k2++) s+=`<rect x="${px}" y="${y+4+(k2%2)*Math.min(8,h-11)}" width="5" height="5" rx="1" fill="${d.accent}"/>` }
+      else { for(let px=x+6;px+3<=x+w-2;px+=9) s+=`<rect x="${px}" y="${y+2}" width="3" height="${Math.round(h*.55)}" rx="1" fill="${d.accent}"/>` }
+    }
+  }
+  const [ex,ey]=sp.eye, baby=d.size==='baby', es=baby?9:7.5;
+  if(o.sleep) s+=`<rect x="${ex}" y="${ey+es/2}" width="${es}" height="2" rx="1" fill="#222"/>`;
+  else s+=`<rect x="${ex}" y="${ey}" width="${es}" height="${es}" rx="1.5" fill="#fff" stroke="#222" stroke-width="1"/><rect x="${ex+es*.48}" y="${ey+es*.22}" width="${es*.4}" height="${es*.55}" rx=".8" fill="#222"/><rect x="${ex+es*.55}" y="${ey+es*.25}" width="1.3" height="1.3" fill="#fff"/>`;
+  if(baby) s+=`<rect x="${ex-1}" y="${ey+es+2}" width="5" height="3" rx="1.5" fill="#ff8fab" opacity=".8"/>`;
+  s+=hatSVG(d.hat,sp);
+  return `<svg class="dsvg${baby?' baby':''}" viewBox="-6 -18 128 108" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+}
+function hatSVG(h,sp){
+  const [cx,y]=sp.hat, [ex,ey]=sp.eye;
+  switch(h){
+    case 'crown': return `<rect x="${cx-9}" y="${y-9}" width="18" height="9" fill="#FFCD03" stroke="#b38f00"/><rect x="${cx-9}" y="${y-14}" width="4" height="5" fill="#FFCD03" stroke="#b38f00"/><rect x="${cx-2}" y="${y-15}" width="4" height="6" fill="#FFCD03" stroke="#b38f00"/><rect x="${cx+5}" y="${y-14}" width="4" height="5" fill="#FFCD03" stroke="#b38f00"/><rect x="${cx-1.5}" y="${y-6}" width="3" height="3" fill="#E3000B"/>`;
+    case 'cap': return `<rect x="${cx-9}" y="${y-8}" width="18" height="8" rx="3" fill="#0057A6" stroke="#003a70"/><rect x="${cx+6}" y="${y-3}" width="12" height="3" rx="1" fill="#0057A6" stroke="#003a70"/><rect x="${cx-2}" y="${y-11}" width="4" height="3" fill="#E3000B"/>`;
+    case 'bow': return `<rect x="${cx-11}" y="${y-9}" width="9" height="8" rx="2" fill="#F49AC1" stroke="#c2618c"/><rect x="${cx+2}" y="${y-9}" width="9" height="8" rx="2" fill="#F49AC1" stroke="#c2618c"/><rect x="${cx-3}" y="${y-7}" width="6" height="5" rx="1" fill="#E3000B"/>`;
+    case 'flower': return `<circle cx="${cx}" cy="${y-9}" r="4" fill="#fff"/><circle cx="${cx-5}" cy="${y-5}" r="4" fill="#fff"/><circle cx="${cx+5}" cy="${y-5}" r="4" fill="#fff"/><circle cx="${cx}" cy="${y-1}" r="3" fill="#fff"/><circle cx="${cx}" cy="${y-5}" r="3.5" fill="#FFCD03"/>`;
+    case 'party': return `<polygon points="${cx-8},${y} ${cx+8},${y} ${cx},${y-20}" fill="#8E4FB5" stroke="#5e2f7d"/><rect x="${cx-4}" y="${y-10}" width="4" height="3" fill="#FFCD03"/><circle cx="${cx}" cy="${y-21}" r="3" fill="#FFCD03"/>`;
+    case 'glasses': return `<rect x="${ex-3}" y="${ey-1.5}" width="11" height="9" rx="2" fill="#222" opacity=".9"/><rect x="${ex-10}" y="${ey+1}" width="8" height="2" fill="#222"/><rect x="${ex-1}" y="${ey}" width="3" height="2" fill="#fff" opacity=".6"/>`;
+  }
+  return '';
+}
+function truckSVG(t){
+  if(t==='tow') return `<svg class="tsvg" viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+   <rect x="16" y="54" width="128" height="26" rx="3" fill="#fff" stroke="#999" stroke-width="1.5"/><rect x="16" y="70" width="128" height="10" fill="#E3000B"/>
+   <polygon points="60,56 52,52 14,6 22,4" fill="#E3000B" stroke="#9a0008" stroke-width="1.5"/><line x1="18" y1="6" x2="18" y2="40" stroke="#222" stroke-width="1.5"/><rect x="14" y="40" width="8" height="6" fill="#9BA19D"/>
+   <rect x="142" y="26" width="48" height="54" rx="5" fill="#fff" stroke="#999" stroke-width="1.5"/><rect x="152" y="32" width="30" height="20" rx="3" fill="#5AB4E5"/><rect x="142" y="62" width="48" height="6" fill="#E3000B"/><rect x="156" y="20" width="6" height="6" fill="#E3000B"/><rect x="172" y="20" width="6" height="6" fill="#E3000B"/>
+   <rect x="186" y="66" width="8" height="8" rx="2" fill="#FFCD03"/>
+   ${[40,72,168].map(x=>`<circle cx="${x}" cy="88" r="13" fill="#2A2A2A"/><circle cx="${x}" cy="88" r="6" fill="#ccc"/>`).join('')}</svg>`;
+  return `<svg class="tsvg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+   <rect x="34" y="20" width="10" height="8" rx="3" fill="#2A2A2A"/><rect x="50" y="20" width="10" height="8" rx="3" fill="#2A2A2A"/><rect x="66" y="20" width="10" height="8" rx="3" fill="#2A2A2A"/><rect x="82" y="20" width="10" height="8" rx="3" fill="#2A2A2A"/>
+   <rect x="30" y="34" width="136" height="36" rx="5" fill="#2A2A2A" stroke="#000"/><rect x="40" y="40" width="40" height="14" rx="3" fill="#555"/><rect x="96" y="44" width="54" height="5" fill="#E8B923"/><rect x="96" y="54" width="34" height="4" fill="#E8B923"/>
+   <rect x="160" y="50" width="12" height="10" rx="2" fill="#FFCD03"/>
+   <rect x="60" y="70" width="80" height="10" fill="#444"/>
+   ${[52,148].map(x=>`<circle cx="${x}" cy="90" r="27" fill="#1a1a1a"/><circle cx="${x}" cy="90" r="27" fill="none" stroke="#444" stroke-width="5" stroke-dasharray="6 5"/><circle cx="${x}" cy="90" r="12" fill="#2A2A2A" stroke="#E8B923" stroke-width="3"/>`).join('')}</svg>`;
+}
+
+/* ============ NAV ============ */
+let screen='start';
+function updateHeader(){
+  $('#hHome').style.visibility=P?'visible':'hidden';
+  $('#hPlayer').style.display=P?'flex':'none';
+  if(P){ $('#hPlayer').textContent='🙂 '+P.name; }
+  $('#hStars').style.display=P?'flex':'none';
+  document.body.classList.toggle('inplay',!!P);
+  $('#hStars').textContent='⭐ '+(P?P.stars:0);
+}
+function go(name,arg){ SFX.click(); stopLoops(); screen=name; render(arg) }
+function goHome(){ go(P?'park':'start') }
+function render(arg){
+  updateHeader(); const m=$('#main'); m.innerHTML=''; m.scrollTop=0;
+  ({start:rStart,newPlayer:rNewPlayer,park:rPark,adopt:rAdopt,dress:rDress,care:rCare,battle:rBattle,family:rFamily,truck:rTruck,bye:rBye})[screen](m,arg);
+}
+function emptyState(m,msg){ m.innerHTML=`<div class="empty"><div class="e">🥚</div><p>${msg}</p><button class="brick" style="--c:#FFCD03;--t:#222" onclick="go('adopt')">🥚 Get a dino</button></div>`; say(msg) }
+function picker(){ return `<div class="picker" id="picker">${P.dinos.map(d=>`<div class="pick ${d.id===sel?'sel':''}" onclick="pickDino('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span></div>`).join('')}</div>` }
+function pickDino(id){ const sl=$('#picker')?$('#picker').scrollLeft:0; sel=id; const d=getD(id); SFX.pop(); render(); if($('#picker')) $('#picker').scrollLeft=sl; if(screen==='care') say(needLine(d)); else say(d.name) }
+function stopLoops(){ if(raf) cancelAnimationFrame(raf); raf=null; clearInterval(cpuTimer); B.running=false }
+
+/* ============ PLAYERS ============ */
+function rStart(m){
+  P=null; updateHeader();
+  m.innerHTML=`<div class="center pad"><div class="logo">${dinoSVG({species:'trex',color:'#00A84F',accent:'#FFCD03',pattern:'spots',hat:'crown',size:'big'})}</div>
+  <h1 class="big">Bami's Dino Park</h1><p class="sub">Who is playing?</p>
+  <div class="players">${DB.players.map(p=>`<button class="brick" style="--c:${p.color};--t:${txt(p.color)}" onclick="pickPlayer('${p.id}')">${esc(p.name)}<small>🦖 ${p.dinos.length} · ⭐ ${p.stars}</small></button>`).join('')}
+  <button class="brick" style="--c:#0057A6" onclick="go('newPlayer')">➕ New player</button></div></div>`;
+}
+let npColor='#00A84F';
+function rNewPlayer(m){
+  m.innerHTML=`<div class="center pad"><h2>What is your name?</h2>
+  <input class="name" id="npName" maxlength="14" value="${DB.players.length?'':'Bami'}" placeholder="Name">
+  <p class="sub">Pick your color!</p><div class="sw">${COLORS.map(([n,h])=>`<button style="background:${h}" class="${h===npColor?'sel':''}" onclick="npColor='${h}';SFX.pop();say('${n}');document.querySelectorAll('.sw button').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')"></button>`).join('')}</div>
+  <button class="brick" style="--c:#00A84F;font-size:26px" onclick="createPlayer()">Let's go! 🦖</button></div>`;
+}
+function createPlayer(){
+  const name=($('#npName').value||'').trim().slice(0,14)||'Player';
+  P={id:uid(),name,color:npColor,stars:0,dinos:[],families:[],lastSeen:Date.now(),created:Date.now()};
+  DB.players.push(P); DB.current=P.id; save(); SFX.fanfare();
+  say(`Hi ${name}! Welcome to the Dino Park! Let's get your first dino!`);
+  screen='adopt'; render();
+}
+function pickPlayer(id){
+  P=DB.players.find(p=>p.id===id); if(!P) return; DB.current=id;
+  const hrs=(Date.now()-(P.lastSeen||Date.now()))/3.6e6, dec=Math.min(55,hrs*4);
+  P.dinos.forEach(d=>{['hunger','clean','energy','happy'].forEach(k=>d[k]=Math.max(Math.min(d[k],20),clamp(d[k]-dec)))});
+  save(); SFX.fanfare(); say(`Hi ${P.name}! Welcome back to the Dino Park!`);
+  sel=null; screen=P.dinos.length?'park':'adopt'; render();
+}
+
+/* ============ PARK ============ */
+let walkers=[],raf=null,lastT=0;
+const MENU=[['🥚','New Dino','adopt','#FFCD03'],['🍖','Care','care','#F57D20'],['🎨','Dress Up','dress','#8E4FB5'],['💥','Battle','battle','#E3000B'],['🏠','Family','family','#0057A6'],['🚚','Truck','truck','#2A2A2A'],['👋','Bye Bye','bye','#00A84F']];
+function rPark(m){
+  m.style.overflow='hidden';
+  m.innerHTML=`<div class="col"><div class="scene" id="scene"><div class="ground"></div>
+   <div class="deco cloud" style="top:4%;font-size:50px">☁️</div><div class="deco cloud" style="top:14%;font-size:36px;animation-delay:-18s">☁️</div>
+   <div class="deco" style="right:4%;top:6%;font-size:84px">🌋</div><div class="deco" style="left:2%;top:18%;font-size:64px">🌴</div><div class="deco" style="left:30%;top:22%;font-size:46px">🌳</div><div class="deco" style="right:30%;top:23%;font-size:40px">🌲</div>
+   ${P.dinos.length?'':`<div class="empty" style="position:absolute;inset:30% 0 0"><button class="brick" style="--c:#FFCD03;--t:#222;font-size:24px" onclick="go('adopt')">🥚 Get your first dino!</button></div>`}
+  </div><div class="menu">${MENU.map(([ic,l,s,c])=>`<button class="brick" style="--c:${c};--t:${txt(c)}" onclick="menuGo('${s}','${l}')"><span class="ic">${ic}</span>${l}</button>`).join('')}</div></div>`;
+  startWander();
+}
+function menuGo(s,l){ say(l); go(s) }
+function startWander(){
+  const sc=$('#scene'); const W=sc.clientWidth;
+  walkers=P.dinos.map(d=>{const el=document.createElement('div');el.className='walker';el.innerHTML=`<div class="inner">${dinoSVG(d)}</div>`;el.onclick=()=>tapParkDino(d.id);sc.appendChild(el);
+    const fly=!!SP[d.species].fly; return {d,el,fly,x:8+Math.random()*84,y:fly?66+Math.random()*16:3+Math.random()*44,vx:(Math.random()<.5?-1:1)*(3+Math.random()*4),pause:Math.random()*2}});
+  walkers.forEach(w=>{const sc2=w.fly?.75:(1-w.y/140);w.el.style.width=Math.max(95,Math.min(210,W*.3*sc2))+'px'});
+  lastT=performance.now(); raf=requestAnimationFrame(stepWander);
+}
+function stepWander(t){
+  const dt=Math.min(.05,(t-lastT)/1000); lastT=t;
+  for(const w of walkers){
+    if(w.pause>0) w.pause-=dt; else{ w.x+=w.vx*dt; if(w.x<7){w.x=7;w.vx=Math.abs(w.vx)} if(w.x>93){w.x=93;w.vx=-Math.abs(w.vx)} if(Math.random()<dt*.18) w.pause=1+Math.random()*2.5; if(Math.random()<dt*.08) w.vx*=-1 }
+    w.el.style.left=w.x+'%'; w.el.style.bottom=w.y+'%'; w.el.style.zIndex=w.fly?90:Math.round(80-w.y);
+    w.el.firstChild.style.transform=`scaleX(${w.vx<0?-1:1})`;
+  }
+  raf=requestAnimationFrame(stepWander);
+}
+function tapParkDino(id){
+  const d=getD(id); if(!d) return; sel=id; SFX.roar(d);
+  const w=walkers.find(x=>x.d.id===id); if(w){anim(w.el.firstChild.firstChild,'jump');w.pause=2}
+  say(`Hi! I am ${d.name}, the ${SP[d.species].name}!`,500);
+  showCard(`<div class="bigwrap" style="width:200px">${dinoSVG(d)}</div><div class="dname">${esc(d.name)}</div><div class="dkind">${SP[d.species].name}</div>
+   <div class="row"><button class="brick" style="--c:#F57D20" onclick="closeCard();go('care')">🍖 Care</button><button class="brick" style="--c:#8E4FB5" onclick="closeCard();go('dress')">🎨 Dress</button><button class="brick" style="--c:#00A84F" onclick="closeCard();go('bye')">👋 Bye</button></div>
+   <button class="brick" style="--c:#9BA19D" onclick="closeCard()">✖ Close</button>`);
+}
+function showCard(html){ closeCard(); const o=document.createElement('div');o.className='overlay';o.id='ov';o.innerHTML=`<div class="card">${html}</div>`;o.onclick=e=>{if(e.target===o)closeCard()};$('#app').appendChild(o) }
+function closeCard(){ const o=$('#ov'); if(o) o.remove() }
+
+/* ============ ADOPT ============ */
+function newDino(k){ const sp=SP[k]; return {id:uid(),species:k,name:rnd(NAMES),color:sp.c,accent:sp.a,pattern:sp.p,hat:'none',size:'big',hunger:80,clean:80,energy:80,happy:80,family:null,born:Date.now()} }
+function rAdopt(m){
+  if(P.dinos.length>=40){ m.innerHTML=`<div class="empty"><div class="e">🦖</div><p>Wow! Your park is full!</p></div>`; return }
+  m.innerHTML=`<h2>Pick a dino egg! 🥚</h2><div class="grid">${Object.keys(SP).map(k=>`<button class="tile" onclick="hatch('${k}')">${dinoSVG(newDino(k))}<b>${SP[k].name}</b></button>`).join('')}</div>`;
+  say('Pick a dino!');
+}
+let taps=0,hatchK=null;
+function hatch(k){
+  hatchK=k; taps=0; SFX.pop(); say(`${SP[k].name}! Tap the egg!`);
+  const c=SP[k].c;
+  showCard(`<h2>Tap the egg!</h2><div class="egg" id="egg" onclick="tapEgg()"><svg viewBox="0 0 100 120" width="160"><ellipse cx="50" cy="65" rx="42" ry="52" fill="#fff8e7" stroke="#d8c39a" stroke-width="3"/><rect x="25" y="40" width="12" height="12" rx="2" fill="${c}"/><rect x="60" y="30" width="10" height="10" rx="2" fill="${c}"/><rect x="55" y="80" width="14" height="14" rx="2" fill="${c}"/><rect x="22" y="78" width="9" height="9" rx="2" fill="${c}"/><path id="crk" d="" stroke="#5a4a2a" stroke-width="3" fill="none"/></svg></div><p class="sub" id="eggtxt">👆 Tap tap tap!</p>`);
+}
+function tapEgg(){
+  taps++; SFX.crack(); anim($('#egg'),'wob',400);
+  const paths=['M30 50 L42 60 L36 70','M30 50 L42 60 L36 70 M60 40 L52 55 L64 62','M30 50 L42 60 L36 70 M60 40 L52 55 L64 62 M20 75 L50 72 L80 78'];
+  if(taps<3){ $('#crk').setAttribute('d',paths[taps-1]); $('#eggtxt').textContent=taps===1?'Again!':'One more!'; say(taps===1?'Again!':'One more!'); return }
+  const d=newDino(hatchK); P.dinos.push(d); sel=d.id; save();
+  SFX.roar(d); confetti(); addStar(1);
+  showCard(`<h2>Hooray! 🎉</h2><div class="bigwrap hatched" style="width:220px">${dinoSVG(d)}</div><div class="dname">${esc(d.name)}</div><div class="dkind">${SP[d.species].name}</div>
+   <div class="row"><button class="brick" style="--c:#8E4FB5" onclick="closeCard();go('dress')">🎨 Dress up</button><button class="brick" style="--c:#00A84F" onclick="closeCard();go('park')">🌳 To the park</button></div>`);
+  say(`Hooray! A baby ${SP[d.species].name}! Its name is ${d.name}!`,700);
+}
+
+/* ============ DRESS UP ============ */
+let dTab='color';
+function rDress(m){
+  const d=getSel(); if(!d) return emptyState(m,'You have no dinos yet!');
+  const tabs=[['color','🎨 Color'],['spots','✨ Spots'],['hat','👑 Hat'],['size','📏 Size'],['name','🔤 Name']];
+  let panel='';
+  if(dTab==='color') panel=`<div class="sw">${COLORS.map(([n,h])=>`<button style="background:${h}" class="${d.color===h?'sel':''}" onclick="setProp('color','${h}','${n}!')"></button>`).join('')}</div>`;
+  if(dTab==='spots') panel=`<div class="chips">${[['none','No spots'],['spots','Spots'],['stripes','Stripes']].map(([v,l])=>`<button class="brick ${d.pattern===v?'on':''}" style="--c:#F57D20" onclick="setProp('pattern','${v}','${l}!')">${l}</button>`).join('')}</div><p class="sub">Spots and plates color</p><div class="sw">${COLORS.map(([n,h])=>`<button style="background:${h}" class="${d.accent===h?'sel':''}" onclick="setProp('accent','${h}','${n}!')"></button>`).join('')}</div>`;
+  if(dTab==='hat') panel=`<div class="chips">${HATS.map(([v,ic,l])=>`<button class="brick ${d.hat===v?'on':''}" style="--c:#FFCD03;--t:#222;font-size:30px" onclick="setProp('hat','${v}','${l}!')">${ic}</button>`).join('')}</div>`;
+  if(dTab==='size') panel=`<div class="chips"><button class="brick ${d.size==='big'?'on':''}" style="--c:#0057A6;font-size:26px" onclick="setProp('size','big','Big dino!')">🦖 Big</button><button class="brick ${d.size==='baby'?'on':''}" style="--c:#F49AC1;font-size:22px" onclick="setProp('size','baby','Baby dino!')">🐣 Baby</button></div>`;
+  if(dTab==='name') panel=`<div class="chips">${NAMES.map(n=>`<button class="brick ${d.name===n?'on':''}" style="--c:${COLORS[n.length%COLORS.length][1]};--t:${txt(COLORS[n.length%COLORS.length][1])}" onclick="setName('${n}')">${n}</button>`).join('')}</div>
+   <div class="row"><button class="brick" style="--c:#8E4FB5" onclick="setName(rnd(NAMES))">🎲 Surprise</button><button class="brick" style="--c:#2A2A2A" onclick="typeName()">✏️ Type a name</button></div>`;
+  m.innerHTML=`${picker()}<div class="stage"><div class="bigwrap" id="dbig" onclick="tapBig()">${dinoSVG(d)}</div><div class="dname">${esc(d.name)}</div></div>
+   <div class="tabs">${tabs.map(([k,l])=>`<button class="brick ${dTab===k?'on':''}" onclick="dTab='${k}';SFX.click();render()">${l}</button>`).join('')}</div><div class="panel">${panel}</div>
+   <div class="row" style="padding-bottom:20px"><button class="brick" style="--c:#00A84F;font-size:24px" onclick="dressDone()">✅ Done!</button></div>`;
+}
+function setProp(k,v,word){ const d=getSel(); d[k]=v; save(); SFX.pop(); say(word); keepScroll(()=>render()); anim($('#dbig'),'jump') }
+function keepScroll(fn){ const m=$('#main'),st=m.scrollTop,sl=$('#picker')?$('#picker').scrollLeft:0; fn(); m.scrollTop=st; if($('#picker')) $('#picker').scrollLeft=sl }
+function setName(n){ const d=getSel(); d.name=n; save(); SFX.pop(); say(`Hello, ${n}!`); keepScroll(()=>render()); anim($('#dbig'),'jump') }
+function typeName(){ const n=prompt('Dino name:',getSel().name); if(n&&n.trim()) setName(n.trim().slice(0,14)) }
+function dressDone(){ const d=getSel(); d.happy=clamp(d.happy+10); save(); SFX.fanfare(); say(`${d.name} looks so cool!`); confetti(); setTimeout(()=>go('park'),1300) }
+function tapBig(){ const d=getSel(); if(!d) return; SFX.roar(d); anim($('#dbig'),'shake'); say(d.name,600) }
+
+/* ============ CARE ============ */
+function needLine(d){
+  const low=[['hunger','I am hungry!'],['clean','I am dirty!'],['energy','I am sleepy!'],['happy','Let\'s play!']].sort((a,b)=>d[a[0]]-d[b[0]])[0];
+  return d[low[0]]<60?`${d.name} says: ${low[1]}`:`${d.name} is happy!`;
+}
+function bricks(v){ const n=Math.ceil(v/20); return Array.from({length:5},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('') }
+function meter(k,ic,v){ return `<div class="meter"><span class="mi">${ic}</span><div class="mbar ${v>=60?'g':v>=30?'y':'r'}" id="m_${k}">${bricks(v)}</div></div>` }
+function updMeters(d){ for(const k of ['hunger','clean','energy','happy']){ const e=$('#m_'+k); if(e){e.className='mbar '+(d[k]>=60?'g':d[k]>=30?'y':'r');e.innerHTML=bricks(d[k])} } }
+function rCare(m){
+  const d=getSel(); if(!d) return emptyState(m,'You have no dinos yet!');
+  const A=(ic,l,fn,c)=>`<button class="brick" style="--c:${c};--t:${txt(c)}" onclick="${fn}"><span class="ic">${ic}</span>${l}</button>`;
+  m.innerHTML=`${picker()}<div class="stage" id="stage"><div class="bigwrap" id="dbig" onclick="tapBig()">${dinoSVG(d)}</div><div class="dname">${esc(d.name)}</div></div>
+   <div class="meters">${meter('hunger','🍖',d.hunger)}${meter('clean','🛁',d.clean)}${meter('energy','⚡',d.energy)}${meter('happy','😊',d.happy)}</div>
+   <div class="acts">${A('🍖','Meat',"feed('meat')",'#E3000B')}${A('🐟','Fish',"feed('fish')",'#5AB4E5')}${A('🥬','Leaves',"feed('leaves')",'#00A84F')}${A('🛁','Bath','bath()','#0057A6')}${A('😴','Sleep','sleepD()','#8E4FB5')}${A('⚽','Play','playD()','#F57D20')}${A('🤗','Hug','hugD()','#F49AC1')}${A('🎨','Dress',"go('dress')",'#FFCD03')}</div>`;
+}
+let busy=false;
+function careDone(d){ save(); updMeters(d); if(['hunger','clean','energy','happy'].every(k=>d[k]>=90)&&Date.now()-(d.superAt||0)>60000){ d.superAt=Date.now(); save(); setTimeout(()=>{confetti();say(`${d.name} is super happy! You get a star!`);addStar(1)},1200) } }
+function feed(kind){
+  const d=getSel(); if(busy||!d) return; const sp=SP[d.species]; const em={meat:'🍖',fish:'🐟',leaves:'🥬'}[kind];
+  if(sp.diet.includes(kind)){ d.hunger=clamp(d.hunger+30); d.happy=clamp(d.happy+5); SFX.munch(); anim($('#dbig'),'munch'); burst(em,4,50,40); bigText('YUM!');
+    say(`Yum yum! ${d.name} loves ${kind}!`) }
+  else { SFX.yuck(); anim($('#dbig'),'shake'); bigText('YUCK!','#A5CA18'); say(`Yuck! ${d.name} does not eat ${kind}. ${sp.name} eats ${sp.diet.join(' and ')}!`) }
+  careDone(d);
+}
+function bath(){ const d=getSel(); if(busy||!d) return; d.clean=clamp(d.clean+40); d.happy=clamp(d.happy+5); SFX.splash(); burst(['🫧','💧','🫧'],9,50,40); anim($('#dbig'),'shake'); bigText('SPLASH!','#5AB4E5'); say(`Splish splash! ${d.name} is so clean!`); careDone(d) }
+function sleepD(){ const d=getSel(); if(busy||!d) return; busy=true; $('#stage').classList.add('night'); $('#dbig').innerHTML=dinoSVG(d,{sleep:true}); say(`Good night, ${d.name}!`); setTimeout(SFX.snore,900); burst(['💤','⭐','🌙'],6,50,30);
+  setTimeout(()=>{ d.energy=clamp(d.energy+45); busy=false; if(screen!=='care') return; $('#stage').classList.remove('night'); $('#dbig').innerHTML=dinoSVG(d); SFX.boing(); anim($('#dbig'),'jump'); say(`Good morning, ${d.name}!`); careDone(d) },3000) }
+function playD(){ const d=getSel(); if(busy||!d) return; if(d.energy<15){ say(`${d.name} is too sleepy. Let's sleep first!`); anim($('#dbig'),'shake'); return }
+  d.happy=clamp(d.happy+25); d.energy=clamp(d.energy-8); d.hunger=clamp(d.hunger-5); SFX.boing(); anim($('#dbig'),'jump'); burst(['⚽','🎈','✨'],5,50,40); bigText('WHEEE!'); say('Wheee! So much fun!'); careDone(d) }
+function hugD(){ const d=getSel(); if(busy||!d) return; d.happy=clamp(d.happy+15); SFX.hug(); burst(['❤️','💖','💛'],8,50,40); anim($('#dbig'),'munch'); say(`I love you, ${d.name}!`); careDone(d) }
+
+/* ============ BATTLE ============ */
+let B={a:null,b:null,mode:'cpu',pos:0,running:false,taps:0,lastS:0}; let cpuTimer=null;
+function rBattle(m){
+  if(P.dinos.length<2) return emptyState(m,'You need two dinos to play battle!');
+  if(!getD(B.a)) B.a=getD(sel)?sel:null; if(!getD(B.b)||B.b===B.a) B.b=null;
+  const slot=id=>{const d=getD(id);return d?`${dinoSVG(d)}<span>${esc(d.name)}</span>`:'Tap a dino 👇'};
+  m.innerHTML=`<div class="corners"><div class="corner" style="background:#00A84F">🟢 You<div class="slot">${slot(B.a)}</div></div><div class="vs">VS</div><div class="corner" style="background:#E3000B">🔴 ${B.mode==='cpu'?'Computer':'Friend'}<div class="slot"><div style="transform:scaleX(-1)">${B.b?dinoSVG(getD(B.b)):''}</div>${B.b?`<span>${esc(getD(B.b).name)}</span>`:'Tap a dino 👇'}</div></div></div>
+   <div class="row"><button class="brick" style="--c:${B.mode==='cpu'?'#0057A6':'#9BA19D'}" onclick="B.mode='cpu';say('Play with the computer');render()">🤖 vs Computer</button><button class="brick" style="--c:${B.mode==='2p'?'#0057A6':'#9BA19D'}" onclick="B.mode='2p';say('Two players');render()">👫 2 Players</button></div>
+   <div class="fdinos" style="padding:8px">${P.dinos.map(d=>`<div class="fd ${d.id===B.a||d.id===B.b?'sel':''}" onclick="bPick('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span></div>`).join('')}</div>
+   <div class="row" style="padding-bottom:24px"><button class="brick" style="--c:#E3000B;font-size:30px;padding:16px 30px" ${B.a&&B.b?'':'disabled'} onclick="startFight()">💥 BATTLE!</button></div>`;
+}
+function bPick(id){ const d=getD(id); SFX.roar(d);
+  if(B.a===id) B.a=null; else if(B.b===id) B.b=null; else if(!B.a) B.a=id; else B.b=id;
+  say(d.name); keepScroll(()=>render()); if(B.a&&B.b) say(`${getD(B.a).name} versus ${getD(B.b).name}! Press battle!`,700) }
+function startFight(){
+  const A=getD(B.a),Bd=getD(B.b); if(!A||!Bd) return;
+  const m=$('#main'); B.pos=0; B.taps=0; B.running=false;
+  m.innerHTML=`<div class="arena" id="arena"><div class="ground baseplate"></div><div class="deco" style="right:6%;top:4%;font-size:60px">🌋</div><div class="pbar"><div id="pfill"></div></div>
+   <div class="fighter" id="fa"><div class="inner">${dinoSVG(A)}</div></div><div class="fighter flipX" id="fb"><div class="inner">${dinoSVG(Bd)}</div></div><div class="count" id="count"></div></div>
+   <div class="fightbtns"><button class="brick tapbtn" style="--c:#00A84F" onpointerdown="push(1,event)">🦖 PUSH!</button>${B.mode==='2p'?`<button class="brick tapbtn" style="--c:#E3000B" onpointerdown="push(-1,event)">PUSH! 🦖</button>`:''}</div>
+   <p class="center sub">Tap tap tap as fast as you can!</p>`;
+  placeF(); let n=3; const cd=()=>{ const c=$('#count'); if(!c) return; if(n>0){c.textContent=n;SFX.count();say(String(n));n--;setTimeout(cd,900)} else {c.textContent='GO!';SFX.go();say('Go!');B.running=true;setTimeout(()=>{if($('#count'))$('#count').textContent=''},700);
+    if(B.mode==='cpu') cpuTimer=setInterval(()=>{ if(!B.running) return; B.pos-=B.pos<-40?2.2:B.pos>40?5:4; placeF(); anim($('#fb'),'lunge-l',180); checkWin() },300)} }; cd();
+}
+function placeF(){ const s=B.pos*.3; const a=$('#fa'),b=$('#fb'); if(!a) return; a.style.left=`calc(${50+s}% - 34%)`; b.style.left=`${50+s}%`; $('#pfill').style.width=(50+B.pos/2)+'%' }
+function push(side,e){ if(e) e.preventDefault(); if(!B.running) return; ac(); B.pos+=side*7; B.taps++; placeF(); anim(side>0?$('#fa'):$('#fb'),side>0?'lunge-r':'lunge-l',180);
+  const now=Date.now(); if(now-B.lastS>110){SFX.bonk();B.lastS=now} if(B.taps%6===0) bigText(rnd(['BONK!','ROAR!','POW!','STOMP!','CRASH!'])); checkWin() }
+function checkWin(){
+  if(Math.abs(B.pos)<100) return; B.running=false; clearInterval(cpuTimer);
+  const side=B.pos>0?1:-1, W=getD(side>0?B.a:B.b), L=getD(side>0?B.b:B.a);
+  $(side>0?'#fb':'#fa').classList.add(side>0?'flyout-r':'flyout-l'); SFX.roar(W); setTimeout(SFX.fanfare,500); confetti();
+  W.happy=clamp(W.happy+10); W.energy=clamp(W.energy-10); L.energy=clamp(L.energy-10); save();
+  const youWin=side>0||B.mode==='2p'; if(youWin) addStar(1);
+  say(`${W.name} wins! Great job!`,600);
+  setTimeout(()=>{ if(screen!=='battle') return; showCard(`<h2>🏆 ${esc(W.name)} wins!</h2><div class="bigwrap" style="width:200px">${dinoSVG(Object.assign({},W,{hat:'crown'}))}</div><p class="sub">${esc(L.name)}: "Good game!" 🤗</p>
+    <div class="row"><button class="brick" style="--c:#E3000B" onclick="closeCard();startFight()">🔁 Again</button><button class="brick" style="--c:#0057A6" onclick="closeCard();render()">🦖 New dinos</button><button class="brick" style="--c:#00A84F" onclick="closeCard();go('park')">🌳 Park</button></div>`);
+    say(`${L.name} says: good game! Friends again!`) },2000);
+}
+
+/* ============ FAMILY ============ */
+let famSel=null;
+function rFamily(m){
+  if(!P.dinos.length) return emptyState(m,'You have no dinos yet!');
+  P.dinos.forEach(d=>{ if(d.family&&!P.families.find(f=>f.id===d.family)) d.family=null });
+  const chip=d=>`<div class="fd ${famSel===d.id?'sel':''}" onclick="event.stopPropagation();famPick('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span></div>`;
+  const wild=P.dinos.filter(d=>!d.family);
+  m.innerHTML=`<div class="hint">${famSel?'👉 Now tap a house!':'👆 Tap a dino, then tap a house!'}</div>
+   <div class="wild" onclick="dropTo(null)"><div class="lbl">🌿 Wild dinos (${wild.length})</div><div class="fdinos">${wild.map(chip).join('')}</div></div>
+   <div class="houses">${P.families.map(f=>{const mem=P.dinos.filter(d=>d.family===f.id);return `<div class="house" style="--c:${f.color}" onclick="dropTo('${f.id}')"><div class="roof"></div><div class="hbody"><div class="lbl">🏠 ${esc(f.name)} · ${mem.length} <button class="x" onclick="event.stopPropagation();delFamily('${f.id}')">✖</button></div><div class="fdinos">${mem.map(chip).join('')}</div></div></div>`}).join('')}</div>
+   <div class="row" style="padding-bottom:24px"><button class="brick" style="--c:#0057A6" onclick="newFamily()">➕ New house</button><button class="brick" style="--c:#F57D20" onclick="sortKind()">🦕 Same kind together</button><button class="brick" style="--c:#8E4FB5" onclick="sortColor()">🎨 Same color together</button></div>`;
+}
+function famPick(id){ const d=getD(id); famSel=famSel===id?null:id; SFX.pop(); if(famSel) say(`${d.name}. Where does ${d.name} live?`); keepScroll(()=>render()) }
+function dropTo(fid){
+  if(!famSel){ if(fid){const f=P.families.find(x=>x.id===fid);const n=P.dinos.filter(d=>d.family===fid).length;say(`The ${f.name} has ${n} ${n===1?'dino':'dinos'}!`)} return }
+  const d=getD(famSel); d.family=fid; famSel=null; save(); SFX.boing();
+  if(fid){ const f=P.families.find(x=>x.id===fid); const n=P.dinos.filter(x=>x.family===fid).length; say(`${d.name} joins the ${f.name}! Now there ${n===1?'is 1 dino':'are '+n+' dinos'}!`) } else say(`${d.name} goes back to the wild!`);
+  keepScroll(()=>render());
+}
+function newFamily(){ const used=P.families.map(f=>f.color); const c=COLORS.find(x=>!used.includes(x[1])&&x[1]!=='#F4F4F4')||rnd(COLORS);
+  P.families.push({id:uid(),name:`${c[0]} Family`,color:c[1]}); save(); SFX.pop(); say(`A new house for the ${c[0]} Family!`); render(); $('#main').scrollTop=9999 }
+function delFamily(id){ P.dinos.forEach(d=>{if(d.family===id)d.family=null}); P.families=P.families.filter(f=>f.id!==id); save(); SFX.bye(); say('Bye bye house!'); keepScroll(()=>render()) }
+function groupBy(keyFn,nameFn,colorFn,msg){
+  P.families=[]; const map={};
+  P.dinos.forEach(d=>{const k=keyFn(d); if(!map[k]){map[k]={id:uid(),name:nameFn(d),color:colorFn(d)};P.families.push(map[k])} d.family=map[k].id});
+  famSel=null; save(); SFX.fanfare(); confetti(); say(msg); render();
+}
+function sortKind(){ groupBy(d=>d.species,d=>`${SP[d.species].name} Family`,d=>SP[d.species].c,'All sorted! Dinos of the same kind live together!') }
+function sortColor(){ groupBy(d=>d.color,d=>`${colorName(d.color)} Family`,d=>d.color==='#F4F4F4'?'#9BA19D':d.color,'All sorted! Same color dinos live together!') }
+
+/* ============ TRUCK ============ */
+const DEST={park:['🌳','Park','linear-gradient(#8fd3ff,#d4f0ff 62%,#3DAE4A 62%)',['🌳','🌴','🌲']],volcano:['🌋','Volcano','linear-gradient(#ff8a3d,#ffd08a 62%,#7a4a2a 62%)',['🌋','🔥','🪨']],beach:['🏖️','Beach','linear-gradient(#7fd6ff,#bfefff 50%,#2f8fd8 50%,#2f8fd8 62%,#f3d98b 62%)',['🏖️','🐚','🦀']],jungle:['🌴','Jungle','linear-gradient(#5fbf6a,#a6e3a1 62%,#2d7a33 62%)',['🌴','🌿','🦜']],snow:['❄️','Snow','linear-gradient(#b9d9f7,#eef7ff 62%,#ffffff 62%)',['⛄','❄️','🏔️']]};
+let T={type:null,loaded:[],at:'park',phase:'load'};
+function rTruck(m){
+  if(!P.dinos.length) return emptyState(m,'You have no dinos yet!');
+  T.loaded=T.loaded.filter(id=>getD(id));
+  if(!T.type){ m.innerHTML=`<h2>Pick a truck!</h2><div class="grid" style="grid-template-columns:1fr 1fr;max-width:640px;margin:0 auto">
+    <button class="tile" onclick="pickTruck('monster')">${truckSVG('monster')}<b>Monster Truck</b></button><button class="tile" onclick="pickTruck('tow')">${truckSVG('tow')}<b>Tow Truck</b></button></div>`; say('Pick a truck!'); return }
+  const seats=T.type==='tow'?[[6,48],[27,48],[48,48]]:[[8,70],[27,70],[46,70],[65,70]];
+  const field=P.dinos.filter(d=>!T.loaded.includes(d.id)).slice(0,10);
+  const dst=DEST[T.at];
+  m.innerHTML=`<div class="tscene" id="tscene" style="background:${dst[2]}">
+    ${dst[3].map((e,i)=>`<div class="deco" style="top:${30+i*4}%;${i%2?'right':'left'}:${4+i*8}%;font-size:${60-i*10}px">${e}</div>`).join('')}
+    ${T.phase==='load'?field.map((d,i)=>`<div class="fieldd" style="left:${4+(i%5)*19}%;top:${3+Math.floor(i/5)*24}%" onclick="catchD('${d.id}')">${dinoSVG(d)}</div>`).join(''):''}
+    <div class="truck" id="truck">${truckSVG(T.type)}${T.loaded.map((id,i)=>`<div class="seat ${i===T.loaded.length-1&&T.justIn?'hopin':''}" style="left:${seats[i][0]}%;bottom:${seats[i][1]}%">${dinoSVG(getD(id))}</div>`).join('')}</div></div>
+   <div class="hint">${T.phase==='load'?(T.loaded.length?`🚚 ${T.loaded.length} / ${seats.length} dinos. Where to go?`:'👆 Tap a dino to put it on the truck!'):T.phase==='arrived'?`🎉 We are at the ${dst[1]}!`:'Vroom vroom!'}</div>
+   <div class="row" style="padding-bottom:20px">${T.phase==='load'&&T.loaded.length?Object.entries(DEST).filter(([k])=>k!==T.at).map(([k,v])=>`<button class="brick" style="--c:#0057A6" onclick="drive('${k}')">${v[0]} ${v[1]}</button>`).join(''):''}
+   ${T.phase==='arrived'?`<button class="brick" style="--c:#00A84F;font-size:24px" onclick="unload()">🚪 Get out!</button><button class="brick" style="--c:#0057A6" onclick="T.phase='load';render()">🚚 Drive more</button>`:''}
+   ${T.phase==='load'?`<button class="brick" style="--c:#9BA19D" onclick="T.type=null;T.loaded=[];T.at='park';render()">🔄 Other truck</button>`:''}</div>`;
+  T.justIn=false;
+}
+function pickTruck(t){ T.type=t; T.loaded=[]; T.at='park'; T.phase='load'; SFX.honk(); say(t==='tow'?'Tow truck! Beep beep!':'Monster truck! Vroom vroom!'); render() }
+function catchD(id){ const max=T.type==='tow'?3:4; const d=getD(id);
+  if(T.loaded.length>=max){ say('The truck is full!'); SFX.honk(); return }
+  T.loaded.push(id); T.justIn=true; SFX.boing(); say(`${d.name} hops in! ${T.loaded.length}!`); render() }
+function drive(k){ if(T.phase!=='load') return; T.phase='driving'; const tr=$('#truck'); tr.classList.add('rumble'); SFX.honk(); say(`Let's go to the ${DEST[k][1]}!`);
+  setTimeout(()=>{SFX.vroom(); tr.classList.add('driveout')},500);
+  setTimeout(()=>{ if(screen!=='truck') return; T.at=k; render(); const t2=$('#truck'); t2.classList.add('drivein','rumble'); SFX.vroom();
+    setTimeout(()=>{ if(screen!=='truck') return; T.phase='arrived'; render(); SFX.honk(); confetti(); say(`We are at the ${DEST[k][1]}! Hooray!`); addStar(1); P.dinos.forEach(d=>{if(T.loaded.includes(d.id))d.happy=clamp(d.happy+10)}); save() },1900) },2200) }
+function unload(){ SFX.boing(); say('Everybody out! Bye bye truck!'); T.loaded=[]; T.at='park'; T.phase='load'; render() }
+
+/* ============ BYE BYE ============ */
+function rBye(m){
+  const d=getSel(); if(!d) return emptyState(m,'You have no dinos yet!');
+  m.innerHTML=`${picker()}<div class="stage" style="background:linear-gradient(#a6e3a1,#eaf8e6);overflow:hidden"><div class="deco" style="right:2%;top:10%;font-size:70px">🌴</div><div class="deco" style="right:16%;top:30%;font-size:50px">🌿</div><div class="bigwrap" id="dbig">${dinoSVG(d)}</div><div class="dname">${esc(d.name)}</div></div>
+   <p class="center sub">Send <b>${esc(d.name)}</b> back to nature?</p>
+   <div class="row" style="padding-bottom:24px"><button class="brick" style="--c:#00A84F;font-size:26px" onclick="byeYes()">✅ Yes</button><button class="brick" style="--c:#E3000B;font-size:26px" onclick="say('Okay! ${d.name.replace(/[^\w ]/g,'')} stays!');go('park')">❌ No</button></div>`;
+  say(`Send ${d.name} back to nature?`);
+}
+function byeYes(){ const d=getSel(); if(busy) return; busy=true; SFX.bye(); burst(['👋','💚','🌿'],8,50,35); $('#dbig').classList.add('walkaway');
+  say(`Bye bye, ${d.name}! Have fun in the wild!`);
+  setTimeout(()=>{ busy=false; P.dinos=P.dinos.filter(x=>x.id!==d.id); T.loaded=T.loaded.filter(x=>x!==d.id); sel=null; save(); if(screen==='bye') go(P.dinos.length?'bye':'park') },2400) }
+
+/* ============ GROWN-UPS ============ */
+(function(){ const g=$('#hGear'); let tm=null;
+  const start=e=>{e.preventDefault(); const h=document.createElement('div');h.className='gear-hint';h.id='gh';h.textContent='Grown-ups: keep holding…';$('#app').appendChild(h); tm=setTimeout(()=>{end();openSettings()},1500)};
+  const end=()=>{clearTimeout(tm); const h=$('#gh'); if(h) h.remove()};
+  g.addEventListener('pointerdown',start); g.addEventListener('pointerup',end); g.addEventListener('pointerleave',end); g.addEventListener('pointercancel',end);
+})();
+function openSettings(){
+  const s=DB.settings;
+  showCard(`<h2>⚙️ Grown-ups</h2>
+   <div class="setrow">🔊 Sounds <button class="brick" style="--c:${s.sound?'#00A84F':'#9BA19D'}" onclick="DB.settings.sound=!DB.settings.sound;save();openSettings()">${s.sound?'ON':'OFF'}</button></div>
+   <div class="setrow">🗣️ Voice <button class="brick" style="--c:${s.voice?'#00A84F':'#9BA19D'}" onclick="DB.settings.voice=!DB.settings.voice;save();openSettings()">${s.voice?'ON':'OFF'}</button></div>
+   <div class="setrow">💾 Backup all players <button class="brick" style="--c:#0057A6" onclick="backup()">Save file</button></div>
+   <div class="setrow">📂 Restore backup <button class="brick" style="--c:#0057A6" onclick="$('#rf').click()">Open file</button><input type="file" id="rf" accept=".json,application/json" style="display:none" onchange="restore(this)"></div>
+   ${P?`<div class="setrow">🗑️ Delete player "${esc(P.name)}" <button class="brick" style="--c:#E3000B" onclick="delPlayer()">Delete</button></div>`:''}
+   <p style="font-size:13px;color:#666;text-align:left">Progress is saved in this browser. Tip: add this page to the Home Screen so the browser keeps the save, and make a backup file now and then.</p>
+   <button class="brick" style="--c:#9BA19D" onclick="closeCard()">Close</button>`);
+}
+function backup(){ const b=new Blob([JSON.stringify(DB,null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`bami-dino-park-${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove() }
+function restore(inp){ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const x=JSON.parse(r.result); if(!Array.isArray(x.players)) throw 0; if(!confirm('Replace current save with this backup?')) return; DB=x; DB.settings=Object.assign({sound:true,voice:true},DB.settings||{}); save(); closeCard(); P=null; go('start'); alert('Backup restored!') }catch(e){ alert('This file is not a Dino Park backup.') } }; r.readAsText(f) }
+function delPlayer(){ if(!confirm(`Delete player "${P.name}" and all dinos? This cannot be undone.`)) return; DB.players=DB.players.filter(p=>p.id!==P.id); DB.current=null; P=null; save(); closeCard(); go('start') }
+
+/* gentle decay while playing */
+setInterval(()=>{ if(!P) return; P.dinos.forEach(d=>{['hunger','clean','energy','happy'].forEach(k=>d[k]=Math.max(20,d[k]-2))}); save(); if(screen==='care'&&getSel()) updMeters(getSel()) },120000);
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) save() });
+document.addEventListener('pointerdown',()=>{ try{ac()}catch(e){} },{once:true});
+document.addEventListener('dblclick',e=>e.preventDefault());
+const _render=render; render=function(a){ $('#main').style.overflow=''; _render(a) };
+render();
+</script>
+</body>
+</html>
