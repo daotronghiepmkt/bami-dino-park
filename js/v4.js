@@ -47,7 +47,7 @@ function rTruck(m){
   const V=VEH[T.type],field=P.dinos.filter(d=>!T.loaded.includes(d.id)),dst=DEST[T.at],L=T.last,max=V.seats.length;
   m.innerHTML=`<div class="tscene t4" id="tscene">${sceneSVG(T.at)}<div class="truck ${T.phase==='arrived'?'drivein':''}" id="truck">${vehHTML()}</div></div>
    ${T.phase==='arrived'&&L?`<div class="tres"><div class="tres-t">${L.ok?'🎉':'🚧'} ${dst[0]} ${dst[1]}!</div><div class="tres-r"><span>🏁 <b>${L.score}</b></span><span>🪙 +${L.earned}</span><span>⭐ +1</span></div>${L.isBest?'<div class="newbest">🏆 NEW BEST!</div>':''}</div>`:''}
-   <div class="hint">${T.phase==='load'?(T.loaded.length?`${V.fly?'✈️':'🚚'} ${T.loaded.length} / ${max} dinos on the ${V.n}. Where to go?`:`👇 Tap a dino to get on the ${V.n}!`):`🎉 We are at the ${dst[1]}!`}</div>
+   <div class="hint">${T.phase==='load'?(T.loaded.length?`${T.type==='sleigh'?'🛷':V.fly?'✈️':'🚚'} ${T.loaded.length} / ${max} dinos on the ${V.n}. Where to go?`:`👇 Tap a dino to get on the ${V.n}!`):`🎉 We are at the ${dst[1]}!`}</div>
    ${T.phase==='load'?`<div class="lineup"><div class="fdinos">${field.map(d=>`<div class="fd" onclick="catchD('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span></div>`).join('')||'<p>Everyone is on board! 🎉</p>'}</div></div>`:''}
    <div class="row" style="padding-bottom:12px">${T.phase==='load'&&T.loaded.length?Object.entries(DEST).filter(([k])=>k!==T.at).map(([k,v])=>`<button class="brick" style="--c:${k==='park'?'#00A84F':'#0057A6'}" onclick="drive('${k}')">${v[0]} ${v[1]}</button>`).join(''):''}
    ${T.phase==='arrived'?`<button class="brick" style="--c:#00A84F;font-size:22px" onclick="unload()">🚪 Get out!</button><button class="brick" style="--c:#0057A6" onclick="T.phase='load';render()">${V.fly?'✈️ Fly on':'🚚 Drive on'}</button>`:''}
@@ -63,3 +63,24 @@ function truckImgURL(){ const V=VEH[T.type],tH=V.h,top=150-tH; let s=nestSVG(tru
   const w=V.dw*2,kh=V.drv==='seat'?w*82/60:w*48/50; s+=nestSVG(kidSVG(P,V.drv==='seat'?{seat:1}:{head:1}),V.dl*2,top+tH*(1-V.db/100)-kh,w,kh);
   return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="400" height="300">${s}</svg>`) }
 window.drive=(o=>function(k){ o(k); if(RN&&VEH[T.type]) setTimeout(()=>{ if(RN) (SFX[VEH[T.type].snd]||SFX.honk)() },200) })(window.drive);
+
+/* v5: Engineering Truck + Christmas Sleigh */
+Object.assign(VEH,{
+ engineer:{n:'Engineering Truck',h:120,seats:[[2,57],[19,57],[36,57]],sw:19,drv:'head',dl:73,db:74,dw:13,snd:'digger'},
+ sleigh:{n:'Christmas Sleigh',h:110,seats:[[6,53],[25,53],[44,53]],sw:19,drv:'head',dl:66,db:53,dw:14,snd:'jingle',fly:1}
+});
+SFX.digger=()=>{tone(70,1,'sawtooth',.14,95);for(let i=0;i<3;i++) tone(1000,.18,'square',.07,null,.2+i*.35)};
+SFX.jingle=()=>{for(let i=0;i<10;i++) tone(2000+Math.random()*1400,.12,'triangle',.06,null,i*.08);[784,784,784].forEach((f,i)=>tone(f,.18,'square',.05,null,.9+i*.2))};
+Object.assign(vSVG,{
+ engineer:()=>R(18,64,156,20,'#222',null,3)+R(6,50,108,14,'#2a2a2a','#000',3)+[16,30,44,58,72,86,100].map(x=>Cc(x,55,1.6,'#555')).join('')+R(90,44,22,8,'#2a2a2a','#000',2)
+   +R(64,64,62,24,'#1b1b1b',null,2)+R(70,66,50,8,'#E3000B',null,4)+`<text x="95" y="72.5" font-size="5.6" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial">ENGINEERING</text>`+R(72,75,46,7,'#F5A623')+`<text x="95" y="81" font-size="6.5" font-weight="700" fill="#1b1b1b" text-anchor="middle" font-family="Arial">TRUCK</text>`+[74,82,90,98,106].map(x=>`<polygon points="${x},88 ${x+4},83 ${x+7},83 ${x+3},88" fill="#F5A623"/>`).join('')
+   +R(118,26,66,46,'#E8952F','#a8641a',4)+R(124,12,48,18,'#E8952F','#a8641a',4)+R(130,16,16,11,'#1b1b1b',null,2)+R(150,16,16,11,'#1b1b1b',null,2)+[34,38,42].map(y=>`<line x1="172" y1="${y}" x2="184" y2="${y}" stroke="#a8641a" stroke-width="1.2"/>`).join('')
+   +`<path d="M116 38 H188 M116 38 V62 M188 38 V62 M139 38 V62 M164 38 V62 M116 50 H188" stroke="#1b1b1b" stroke-width="2.6" fill="none" stroke-linecap="round"/>`+R(182,56,12,28,'#E8952F','#a8641a',2)
+   +tire(48,94,24,'#E8952F')+tire(150,94,24,'#E8952F'),
+ sleigh:()=>`<path d="M8 98 H168 Q192 98 190 80" stroke="#E8B923" stroke-width="5" fill="none" stroke-linecap="round"/>`+[40,90,140].map(x=>`<line x1="${x}" y1="86" x2="${x}" y2="98" stroke="#E8B923" stroke-width="4"/>`).join('')
+   +`<path d="M14 50 Q12 88 42 88 L158 88 Q182 88 186 64 Q190 42 174 40 L158 50 Z" fill="#d7261e" stroke="#8a1410" stroke-width="1.5"/>`+R(14,46,148,6,'#00A84F','#00733a',3)+[24,44,64,84,104,124,144].map(x=>Cc(x,49,1.8,'#FFCD03')).join('')
+   +`<path d="M30 66 Q60 58 90 66 T150 66" stroke="#FFCD03" stroke-width="2.5" fill="none"/>`
+   +`<path d="M178 64 V28 Q178 16 166 18 Q158 20 160 28" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M178 64 V28 Q178 16 166 18 Q158 20 160 28" stroke="#E3000B" stroke-width="5" fill="none" stroke-dasharray="4 4"/>`
+   +`<path d="M186 56 l3 -7 l3 7 l-3 7 Z" fill="#FFCD03"><animate attributeName="opacity" values="1;.2;1" dur=".8s" repeatCount="indefinite"/></path><path d="M6 40 l2 -5 l2 5 l-2 5 Z" fill="#fff"><animate attributeName="opacity" values=".2;1;.2" dur="1s" repeatCount="indefinite"/></path>`
+   +Cc(170,48,4,'#FFCD03','#b38f00')+Cc(164,52,3.5,'#FFCD03','#b38f00')
+});
