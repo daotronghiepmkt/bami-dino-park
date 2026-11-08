@@ -34,26 +34,26 @@ function truckImgURL(){
 }
 function drive(k){
   if(T.phase!=='load'||!T.loaded.length) return; T.dest=k; T.phase='run';
-  const m=$('#main'); m.innerHTML=`<div class="runwrap" id="rw"><canvas id="rc"></canvas><div class="rhud"><span id="rH">❤️❤️❤️</span><span id="rS">🏁 0</span><span id="rC">🪙 0</span></div><div class="rprog"><i id="rP"></i><b>${DEST[k][0]}</b><em id="rTk">🚚</em></div><div class="rtip" id="rT">👆 Tap to jump!</div></div>
-   <div class="row"><button class="brick" style="--c:#00A84F;font-size:30px;flex:1;max-width:520px;padding:18px" onpointerdown="event.preventDefault();rJump()">⬆️ JUMP!</button></div><p class="center" style="font-size:15px;margin:2px 8px 16px">Jump over things! Grab the 🪙 coins! Tap twice for a double jump.</p>`;
+  const m=$('#main'); m.innerHTML=`<div class="runwrap" id="rw"><canvas id="rc"></canvas><div class="rhud"><span id="rH">❤️❤️❤️</span><span id="rS">🏁 0</span><span id="rC">🪙 0</span></div><div class="rprog"><i id="rP"></i><b>${DEST[k][0]}</b><em id="rTk">🚚</em></div><div class="rtip" id="rT">${VEH[T.type].fly?'👆 Tap to fly up and down!':'👆 Tap to jump!'}</div></div>
+   <div class="row"><button class="brick" style="--c:#00A84F;font-size:30px;flex:1;max-width:520px;padding:18px" onpointerdown="event.preventDefault();rJump()">${VEH[T.type].fly?'⬆️⬇️ FLY!':'⬆️ JUMP!'}</button></div><p class="center" style="font-size:15px;margin:2px 8px 16px">${VEH[T.type].fly?'Fly up or down to miss the clouds and birds! Grab the 🪙 coins!':'Jump over things! Grab the 🪙 coins! Tap twice for a double jump.'}</p>`;
   const rw=$('#rw'),cv=$('#rc'),dpr=Math.min(2,window.devicePixelRatio||1),W=rw.clientWidth,H=rw.clientHeight; cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
   rw.addEventListener('pointerdown',e=>{e.preventDefault();rJump()});
   const img=new Image(); img.src=truckImgURL(); const tw=Math.min(W*.36,240);
-  RN={k,W,H,ctx,img,tw,th:tw*.75,x:W*.05,y:0,vy:0,jumps:0,t:0,dur:40,off:0,obs:[],coins:[],dust:[],hearts:3,inv:0,score:0,coinN:0,jumped:0,so:2.2,sc:1.2,over:false,thm:TH[k]||TH.park,started:false,last:0,raf:0,flakes:Array.from({length:30},()=>({x:Math.random()*W,y:Math.random()*H,v:20+Math.random()*30}))};
+  RN={k,fly:!!VEH[T.type].fly,lane:0,W,H,ctx,img,tw,th:tw*.75,x:W*.05,y:0,vy:0,jumps:0,t:0,dur:40,off:0,obs:[],coins:[],dust:[],hearts:3,inv:0,score:0,coinN:0,jumped:0,so:2.2,sc:1.2,over:false,thm:TH[k]||TH.park,started:false,last:0,raf:0,flakes:Array.from({length:30},()=>({x:Math.random()*W,y:Math.random()*H,v:20+Math.random()*30}))};
   SFX.honk(); setTimeout(SFX.vroom,300); say(`Beep beep! ${P.name} drives to the ${DEST[k][1]}! Tap to jump!`);
   setTimeout(()=>{ if(!RN) return; RN.started=true; const tip=$('#rT'); if(tip) tip.textContent='' },1800);
   RN.raf=requestAnimationFrame(rStep);
 }
-function rJump(){ const Q=RN; if(!Q||Q.over) return; if(!Q.started){Q.started=true; const tip=$('#rT'); if(tip) tip.textContent=''} if(Q.jumps<2){ Q.vy=Q.H*1.25*(Q.jumps?.8:1); Q.jumps++; SFX.jump() } }
+function rJump(){ const Q=RN; if(!Q||Q.over) return; if(!Q.started){Q.started=true; const tip=$('#rT'); if(tip) tip.textContent=''} if(Q.fly){ Q.lane=1-Q.lane; SFX.whoosh(); tone(Q.lane?600:420,.15,'sine',.1,Q.lane?900:300); return } if(Q.jumps<2){ Q.vy=Q.H*1.25*(Q.jumps?.8:1); Q.jumps++; SFX.jump() } }
 function rStep(t){ const Q=RN; if(!Q||Q.over) return; const dt=Math.min(.05,(t-(Q.last||t))/1000); Q.last=t; if(Q.started) rUpdate(dt); if(RN) rDraw(); if(RN&&!RN.over) RN.raf=requestAnimationFrame(rStep) }
 function rUpdate(dt){
   const Q=RN,{W,H}=Q,gy=H*.84,g=H*2.4;
   Q.t+=dt; const prog=Math.min(1,Q.t/Q.dur),spd=W*(.32+.2*prog); Q.off+=spd*dt;
-  if(Q.y>0||Q.vy>0){ Q.vy-=g*dt; Q.y+=Q.vy*dt; if(Q.y<=0){Q.y=0;Q.vy=0;Q.jumps=0; for(let i=0;i<5;i++) Q.dust.push({x:Q.x+Q.tw*.3+Math.random()*Q.tw*.5,y:gy,vx:-40-Math.random()*60,vy:-20-Math.random()*40,l:.5})} }
+  if(Q.fly){ const tg=Q.lane?H*.4:H*.1; Q.y+=(tg-Q.y)*Math.min(1,dt*7) } else if(Q.y>0||Q.vy>0){ Q.vy-=g*dt; Q.y+=Q.vy*dt; if(Q.y<=0){Q.y=0;Q.vy=0;Q.jumps=0; for(let i=0;i<5;i++) Q.dust.push({x:Q.x+Q.tw*.3+Math.random()*Q.tw*.5,y:gy,vx:-40-Math.random()*60,vy:-20-Math.random()*40,l:.5})} }
   if(Q.inv>0) Q.inv-=dt;
   if(Q.t<Q.dur-2.5){
-    Q.so-=dt; if(Q.so<=0){ Q.obs.push({x:W+40,e:rnd(Q.thm.ob),s:H*.095,pass:0,hit:0}); Q.so=1.75+Math.random()*1.2-prog*.4 }
-    Q.sc-=dt; if(Q.sc<=0){ const n=3+Math.floor(Math.random()*3),hh=H*(.08+Math.random()*.24); for(let i=0;i<n;i++) Q.coins.push({x:W+30+i*34,h:hh+Math.sin(i/(n-1)*Math.PI)*H*.06,got:0}); Q.sc=1.5+Math.random()*1.2 }
+    Q.so-=dt; if(Q.so<=0){ Q.obs.push(Q.fly?{x:W+40,e:rnd(['☁️','🐦','🎈','🪁']),s:H*.12,lane:Math.random()<.5?0:1,pass:0,hit:0}:{x:W+40,e:rnd(Q.thm.ob),s:H*.095,pass:0,hit:0}); Q.so=1.75+Math.random()*1.2-prog*.4 }
+    Q.sc-=dt; if(Q.sc<=0){ const n=3+Math.floor(Math.random()*3),hh=Q.fly?(Math.random()<.5?H*.4:H*.1)+Q.th*.35:H*(.08+Math.random()*.24); for(let i=0;i<n;i++) Q.coins.push({x:W+30+i*34,h:hh+(Q.fly?0:Math.sin(i/(n-1)*Math.PI)*H*.06),got:0}); Q.sc=1.5+Math.random()*1.2 }
   }
   for(const o of Q.obs) o.x-=spd*dt; for(const c of Q.coins) c.x-=spd*dt;
   for(const d of Q.dust){d.x+=d.vx*dt;d.y+=d.vy*dt;d.l-=dt}
@@ -61,7 +61,7 @@ function rUpdate(dt){
   const tx1=Q.x+Q.tw*.22,tx2=Q.x+Q.tw*.8,tb=gy-Q.y,ttop=tb-Q.th*.8;
   for(const o of Q.obs){
     const ox1=o.x-o.s*.25,ox2=o.x+o.s*.25,otop=gy-o.s*.62;
-    if(!o.hit&&Q.inv<=0&&ox2>tx1&&ox1<tx2&&tb>otop){ o.hit=1; Q.hearts--; Q.inv=1.5; SFX.bonk(); anim($('#rw'),'shake',400); $('#rH').textContent='❤️'.repeat(Math.max(0,Q.hearts))+'🤍'.repeat(3-Math.max(0,Q.hearts)); say(Q.hearts>0?'Bump! Careful!':''); if(Q.hearts<=0){ rFinish(false); return } }
+    if(!o.hit&&Q.inv<=0&&ox2>tx1&&ox1<tx2&&(Q.fly?Math.abs(Q.y-(o.lane?H*.4:H*.1))<H*.14:tb>otop)){ o.hit=1; Q.hearts--; Q.inv=1.5; SFX.bonk(); anim($('#rw'),'shake',400); $('#rH').textContent='❤️'.repeat(Math.max(0,Q.hearts))+'🤍'.repeat(3-Math.max(0,Q.hearts)); say(Q.hearts>0?'Bump! Careful!':''); if(Q.hearts<=0){ rFinish(false); return } }
     if(!o.pass&&o.x<tx1-o.s*.4){ o.pass=1; if(!o.hit){Q.jumped++;Q.score+=5} }
   }
   for(const c of Q.coins){ const cy=gy-c.h; if(c.x>tx1&&c.x<tx2&&cy>ttop-12&&cy<tb){ c.got=1; Q.coinN++; Q.score+=10; SFX.coin() } }
@@ -84,9 +84,10 @@ function rDraw(){
   ctx.font=`${Math.round(H*.085)}px ${EMO}`; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.globalAlpha=.75; const dO=(Q.off*.35)%(W*.45); th.deco.forEach((e,i)=>{ for(let x=-dO+i*W*.15;x<W+W*.45;x+=W*.45) ctx.fillText(e,x,gy-H*.09) }); ctx.globalAlpha=1;
   ctx.fillStyle=th.gr; ctx.fillRect(0,gy,W,H-gy); ctx.fillStyle=th.dk; ctx.fillRect(0,gy,W,4); const so=Q.off%24; ctx.globalAlpha=.35; for(let x=-so;x<W+24;x+=24){ circ(x,gy+14,5,th.dk); circ(x+12,gy+34,5,th.dk) } ctx.globalAlpha=1;
   for(const c of Q.coins){ const cy=gy-c.h,r=H*.03; circ(c.x,cy,r,'#b38f00'); circ(c.x,cy,r*.82,'#FFCD03'); ctx.fillStyle='#fff8c8'; ctx.fillRect(c.x-r*.15,cy-r*.5,r*.3,r) }
-  ctx.font=`${Math.round(H*.095)}px ${EMO}`; for(const o of Q.obs){ ctx.globalAlpha=o.hit?.4:1; ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(o.x,gy+4,o.s*.42,o.s*.1,0,0,Math.PI*2); ctx.fill(); if(!o.hit&&o.x<W*.85&&o.x>Q.x+Q.tw){ ctx.fillStyle='rgba(227,0,11,.85)'; ctx.font=`bold ${Math.round(H*.05)}px sans-serif`; ctx.fillText('!',o.x,gy-o.s*.95); ctx.font=`${Math.round(H*.095)}px ${EMO}` } ctx.fillText(o.e,o.x,gy+o.s*.08) } ctx.globalAlpha=1;
+  ctx.font=`${Math.round(H*.095)}px ${EMO}`; for(const o of Q.obs){ ctx.globalAlpha=o.hit?.4:1; ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(o.x,gy+4,o.s*.42,o.s*.1,0,0,Math.PI*2); ctx.fill(); if(!Q.fly&&!o.hit&&o.x<W*.85&&o.x>Q.x+Q.tw){ ctx.fillStyle='rgba(227,0,11,.85)'; ctx.font=`bold ${Math.round(H*.05)}px sans-serif`; ctx.fillText('!',o.x,gy-o.s*.95); ctx.font=`${Math.round(H*.095)}px ${EMO}` } ctx.fillText(o.e,o.x,Q.fly?gy-(o.lane?H*.4:H*.1)-Q.th*.12:gy+o.s*.08) } ctx.globalAlpha=1;
   for(const d of Q.dust) circ(d.x,d.y,4*d.l*2,`rgba(255,255,255,${d.l})`);
-  if(!(Q.inv>0&&Math.floor(Q.inv*10)%2)&&Q.img.complete){ const bob=Q.y>0?0:Math.sin(Q.t*28)*1.5, tilt=Q.y>0?-.06:0; ctx.save(); ctx.translate(Q.x+Q.tw/2,gy-Q.y-Q.th/2+bob); ctx.rotate(tilt); ctx.drawImage(Q.img,-Q.tw/2,-Q.th/2,Q.tw,Q.th); ctx.restore() }
+  if(Q.fly){ ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(Q.x+Q.tw/2,gy+6,Q.tw*.32,5,0,0,Math.PI*2); ctx.fill() }
+  if(!(Q.inv>0&&Math.floor(Q.inv*10)%2)&&Q.img.complete){ const bob=Q.fly?Math.sin(Q.t*4)*4:(Q.y>0?0:Math.sin(Q.t*28)*1.5), tilt=Q.fly?((Q.lane?H*.4:H*.1)-Q.y)/H*-.6:(Q.y>0?-.06:0); ctx.save(); ctx.translate(Q.x+Q.tw/2,gy-Q.y-Q.th/2+bob); ctx.rotate(tilt); ctx.drawImage(Q.img,-Q.tw/2,-Q.th/2,Q.tw,Q.th); ctx.restore() }
   if(th===TH.snow){ ctx.fillStyle='#fff'; for(const f of Q.flakes){ ctx.beginPath(); ctx.arc(f.x,f.y,2.5,0,Math.PI*2); ctx.fill() } }
 }
 function rFinish(ok){

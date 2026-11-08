@@ -1,0 +1,65 @@
+/* v4: 4 new rides (police truck, race car, super car, sky plane) + dino line-up so the truck never hides dinos */
+const VEH={
+ monster:{n:'Monster Truck',h:120,seats:[[0,70],[17,70],[34,70],[51,70]],sw:21,drv:'seat',dl:71,db:58,dw:17,snd:'honk'},
+ tow:{n:'Tow Truck',h:110,seats:[[6,48],[27,48],[48,48]],sw:25,drv:'head',dl:76.5,db:52,dw:14,snd:'honk'},
+ police:{n:'Police Truck',h:120,seats:[[4,78],[22,78],[40,78]],sw:20,drv:'head',dl:74,db:47,dw:14,snd:'siren'},
+ race:{n:'Race Car',h:100,seats:[[4,50],[22,52]],sw:22,drv:'head',dl:47,db:45,dw:15,snd:'race'},
+ super:{n:'Super Car',h:90,seats:[[4,50],[22,54]],sw:20,drv:'head',dl:50,db:50,dw:14,snd:'race'},
+ plane:{n:'Sky Plane',h:110,seats:[[10,58],[28,62],[58,64]],sw:19,drv:'head',dl:81,db:43,dw:12,snd:'prop',fly:1}
+};
+SFX.siren=()=>{for(let i=0;i<4;i++){tone(660,.18,'square',.07,null,i*.36);tone(880,.18,'square',.07,null,i*.36+.18)}};
+SFX.race=()=>{tone(110,.9,'sawtooth',.13,620);tone(220,.9,'square',.04,900);noise(.8,.06,'lowpass',600,2400)};
+SFX.prop=()=>{for(let i=0;i<10;i++) noise(.06,.18,'lowpass',500,null,i*.09); tone(90,.9,'sawtooth',.06,140)};
+const tire=(x,y,r,rim)=>Cc(x,y,r,'#1a1a1a')+Cc(x,y,r*.68,rim)+Cc(x,y,r*.5,'#2a2a2a')+Cc(x,y,r*.16,'#777');
+const vSVG={
+ police:()=>R(18,68,172,20,'#222',null,3)+R(8,30,135,52,'#1f4fd1','#123a9e',5)+R(14,23,112,9,'#fff','#ccc',3)
+   +R(12,45,46,2,'#00A84F')+R(12,48,46,8,'#E3000B')+R(12,57,46,2,'#00A84F')+R(104,45,36,15,'#fff','#ccc',1)+[108,116,124,132].map(x=>`<polygon points="${x},58 ${x+4},47 ${x+7},47 ${x+3},58" fill="#E3000B"/>`).join('')
+   +R(62,30,40,52,'#f4f4f4','#ccc',3)+Cc(82,48,10,'#1f4fd1')+`<polygon points="82,40 84.4,45.5 90.3,45.7 85.7,49.3 87.3,55 82,51.7 76.7,55 78.3,49.3 73.7,45.7 79.6,45.5" fill="#FFCD03"/><text x="82" y="72" font-size="7.5" font-weight="700" fill="#1f4fd1" text-anchor="middle" font-family="Arial">CẢNH SÁT</text>`
+   +`<path d="M140 40 L170 40 L190 62 L192 88 L140 88 Z" fill="#1f4fd1" stroke="#123a9e"/>`+R(148,46,18,14,'#2a2a2a',null,2)+R(170,48,11,12,'#2a2a2a',null,2)+R(186,72,6,7,'#FFCD03')
+   +`<rect x="116" y="14" width="16" height="9" rx="2" fill="#E3000B"><animate attributeName="fill" values="#E3000B;#ff8a8a;#E3000B" dur=".5s" repeatCount="indefinite"/></rect>`+R(100,16,12,7,'#5AB4E5',null,2)
+   +tire(52,94,24,'#fff')+tire(158,94,24,'#fff'),
+ race:()=>R(2,28,32,5,'#222',null,2)+R(15,33,4,18,'#222')+R(4,22,4,12,'#222')
+   +`<path d="M14 72 L18 54 L66 46 L94 38 L132 38 L172 52 L194 62 L192 74 L14 76 Z" fill="#d7261e" stroke="#8a1410" stroke-width="1.5"/>`
+   +`<path d="M94 40 L130 40 L120 54 L98 54 Z" fill="#222"/><path d="M90 42 Q112 18 142 46" stroke="#222" stroke-width="3" fill="none"/><path d="M100 41 Q118 24 136 44" stroke="#222" stroke-width="2" fill="none"/>`+R(102,28,18,4,'#222',null,1)
+   +`<path d="M24 64 L120 57 L184 61" stroke="#5AB4E5" stroke-width="2.6" fill="none"/><path d="M40 69 L134 64" stroke="#FFCD03" stroke-width="2" fill="none"/><polygon points="182,58 194,62 186,64" fill="#FFCD03"/>`+R(12,74,182,5,'#222')
+   +tire(50,80,16,'#9BA19D')+tire(154,80,16,'#9BA19D'),
+ super:()=>R(4,30,30,4,'#111',null,2)+R(15,34,4,12,'#111')
+   +`<path d="M8 66 L10 50 L40 44 L80 30 L120 26 L150 34 L190 52 L194 64 L190 70 L10 72 Z" fill="#FFD60A" stroke="#b39500" stroke-width="1.5"/>`
+   +`<path d="M80 32 L118 27 L146 37 L122 44 L86 44 Z" fill="#1b1b1b"/><polygon points="58,48 84,46 76,62" fill="#1b1b1b"/><polygon points="176,52 190,56 184,60" fill="#2a2a2a"/><path d="M40 52 L48 50 L44 56 L52 56" stroke="#E3000B" stroke-width="1.6" fill="none"/>`+R(30,68,140,4,'#111')
+   +tire(50,72,15,'#1f1f1f')+tire(152,72,15,'#1f1f1f'),
+ plane:()=>`<polygon points="20,58 4,18 18,18 36,48" fill="#55722d" stroke="#33461b"/><polygon points="32,52 24,24 34,24 44,48" fill="#4a6527" stroke="#33461b"/>`
+   +`<path d="M20 62 Q20 44 50 42 L150 40 Q190 42 196 66 Q190 84 150 84 L40 82 Q20 80 20 62 Z" fill="#55722d" stroke="#33461b" stroke-width="1.5"/>`
+   +`<ellipse cx="70" cy="58" rx="16" ry="6" fill="#2d3d17"/><ellipse cx="128" cy="50" rx="12" ry="5" fill="#2d3d17"/><ellipse cx="100" cy="72" rx="14" ry="4" fill="#2d3d17"/>`
+   +`<path d="M166 48 Q186 52 194 62 L168 62 Z" fill="#1b1b1b"/>`+R(64,32,90,8,'#62803a','#33461b',3)+R(98,16,22,32,'#55722d','#33461b',7)
+   +`<g transform="translate(109,15)"><rect x="-28" y="-2" width="56" height="4" rx="2" fill="#222"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur=".35s" repeatCount="indefinite"/></rect></g>`+Cc(109,15,3.5,'#222')
+   +`<text x="138" y="76" font-size="9" font-weight="700" fill="#fff" font-family="Arial">MH-09</text>`+R(136,78,40,2,'#F57D20')+Cc(62,90,6,'#222')+Cc(156,90,6,'#222')
+};
+window.truckSVG=(o=>function(t){ if(vSVG[t]) return `<svg class="tsvg" viewBox="0 0 200 ${VEH[t].h}" xmlns="http://www.w3.org/2000/svg">${vSVG[t]()}</svg>`; return o(t) })(window.truckSVG);
+
+function vehHTML(){ const V=VEH[T.type];
+  return truckSVG(T.type)+T.loaded.map((id,i)=>`<div class="seat ${i===T.loaded.length-1&&T.justIn?'hopin':''}" style="left:${V.seats[i][0]}%;bottom:${V.seats[i][1]}%;width:${V.sw}%">${dinoSVG(getD(id))}</div>`).join('')
+   +`<div class="vdrv" style="left:${V.dl}%;bottom:${V.db}%;width:${V.dw}%" onclick="tapDriver()">${kidSVG(P,V.drv==='seat'?{seat:1}:{head:1})}</div>` }
+function rTruck(m){
+  if(!P.dinos.length) return emptyState(m,'You have no dinos yet!');
+  if(T.phase==='run'||T.phase==='driving') T.phase='load';
+  T.loaded=T.loaded.filter(id=>getD(id)); if(!DEST[T.at]) T.at='park';
+  if(!T.type||!VEH[T.type]){ T.type=null; m.innerHTML=`<h2>Pick a ride!</h2><div class="grid vgrid">${Object.entries(VEH).map(([k,v])=>`<button class="tile" onclick="pickTruck('${k}')">${truckSVG(k)}<b>${v.n}</b></button>`).join('')}</div>${tripBoard()}`; say('Pick a ride!'); return }
+  const V=VEH[T.type],field=P.dinos.filter(d=>!T.loaded.includes(d.id)),dst=DEST[T.at],L=T.last,max=V.seats.length;
+  m.innerHTML=`<div class="tscene t4" id="tscene">${sceneSVG(T.at)}<div class="truck ${T.phase==='arrived'?'drivein':''}" id="truck">${vehHTML()}</div></div>
+   ${T.phase==='arrived'&&L?`<div class="tres"><div class="tres-t">${L.ok?'🎉':'🚧'} ${dst[0]} ${dst[1]}!</div><div class="tres-r"><span>🏁 <b>${L.score}</b></span><span>🪙 +${L.earned}</span><span>⭐ +1</span></div>${L.isBest?'<div class="newbest">🏆 NEW BEST!</div>':''}</div>`:''}
+   <div class="hint">${T.phase==='load'?(T.loaded.length?`${V.fly?'✈️':'🚚'} ${T.loaded.length} / ${max} dinos on the ${V.n}. Where to go?`:`👇 Tap a dino to get on the ${V.n}!`):`🎉 We are at the ${dst[1]}!`}</div>
+   ${T.phase==='load'?`<div class="lineup"><div class="fdinos">${field.map(d=>`<div class="fd" onclick="catchD('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span></div>`).join('')||'<p>Everyone is on board! 🎉</p>'}</div></div>`:''}
+   <div class="row" style="padding-bottom:12px">${T.phase==='load'&&T.loaded.length?Object.entries(DEST).filter(([k])=>k!==T.at).map(([k,v])=>`<button class="brick" style="--c:${k==='park'?'#00A84F':'#0057A6'}" onclick="drive('${k}')">${v[0]} ${v[1]}</button>`).join(''):''}
+   ${T.phase==='arrived'?`<button class="brick" style="--c:#00A84F;font-size:22px" onclick="unload()">🚪 Get out!</button><button class="brick" style="--c:#0057A6" onclick="T.phase='load';render()">${V.fly?'✈️ Fly on':'🚚 Drive on'}</button>`:''}
+   ${T.phase==='load'?`<button class="brick" style="--c:#9BA19D" onclick="T.type=null;T.loaded=[];render()">🔄 Other ride</button>`:''}</div>${tripBoard()}`;
+  T.justIn=false;
+}
+function pickTruck(t){ T.type=t; T.loaded=[]; T.phase='load'; const V=VEH[t]; (SFX[V.snd]||SFX.honk)(); say(`${P.name} drives the ${V.n}! ${{siren:'Nee naw nee naw!',race:'Vroom vroom!',prop:'Whirr whirr!',honk:'Beep beep!'}[V.snd]}`); render() }
+function catchD(id){ const V=VEH[T.type],d=getD(id); if(T.loaded.length>=V.seats.length){ say(`The ${V.n} is full!`); (SFX[V.snd]||SFX.honk)(); return }
+  T.loaded.push(id); T.justIn=true; SFX.boing(); say(`${d.name} hops in! ${T.loaded.length}!`); render() }
+function tapDriver(){ const V=VEH[T.type]; (SFX[V.snd]||SFX.honk)(); anim(document.querySelector('.vdrv'),'jump'); say(rnd([`${P.name} is driving!`,'Hold on, dinos!',V.fly?'Up in the sky!':'Beep beep!'])) }
+function truckImgURL(){ const V=VEH[T.type],tH=V.h,top=150-tH; let s=nestSVG(truckSVG(T.type),0,top,200,tH);
+  T.loaded.forEach((id,i)=>{ const d=getD(id); if(!d) return; const w=V.sw*2*(d.size==='baby'?.7:1),h=w*112/132,yb=top+tH*(1-V.seats[i][1]/100); s+=nestSVG(dinoSVG(d),V.seats[i][0]*2+(V.sw*2-w)/2,yb-h,w,h) });
+  const w=V.dw*2,kh=V.drv==='seat'?w*82/60:w*48/50; s+=nestSVG(kidSVG(P,V.drv==='seat'?{seat:1}:{head:1}),V.dl*2,top+tH*(1-V.db/100)-kh,w,kh);
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="400" height="300">${s}</svg>`) }
+window.drive=(o=>function(k){ o(k); if(RN&&VEH[T.type]) setTimeout(()=>{ if(RN) (SFX[VEH[T.type].snd]||SFX.honk)() },200) })(window.drive);
