@@ -200,7 +200,7 @@ function houseSVG(f){
   if(has('lights')){ const [[x1,y1],[x2,y2]]=lights; for(let i=0;i<=8;i++){const x=x1+(x2-x1)*i/8,y=y1+(y2-y1)*i/8+Math.sin(i/8*Math.PI)*5; h+=`<circle cx="${x}" cy="${y}" r="2.6" fill="${['#E3000B','#FFCD03','#00A84F','#5AB4E5'][i%4]}"><animate attributeName="opacity" values="1;.35;1" dur="${.8+(i%3)*.3}s" repeatCount="indefinite"/></circle>`} }
   if(has('flag')){ const [px,py]=peak; h+=`<line x1="${px}" y1="${py}" x2="${px}" y2="${py-20}" stroke="#555" stroke-width="1.5"/><path d="M${px} ${py-20} L${px+14} ${py-16} L${px} ${py-12} Z" fill="#FFCD03" stroke="#b38f00"><animate attributeName="d" values="M${px} ${py-20} L${px+14} ${py-16} L${px} ${py-12} Z;M${px} ${py-20} L${px+13} ${py-14} L${px} ${py-12} Z;M${px} ${py-20} L${px+14} ${py-16} L${px} ${py-12} Z" dur="1s" repeatCount="indefinite"/></path>`; }
   s+=`<g transform="translate(20,0)">${h}</g>`;
-  s+=R(0,136,240,24,'#3DAE4A'); for(let x=6;x<240;x+=12) s+=Cc(x,142,3.2,'#56c463','#2f8f3a',.6);
+  s+=R(0,136,240,24,'#9ad985'); for(let x=6;x<240;x+=12) s+=Cc(x,142,3.2,'#b3e6a1','#7fc96b',.6);
   if(has('pool')) s+=`<ellipse cx="44" cy="149" rx="28" ry="7" fill="#5AB4E5" stroke="#fff" stroke-width="2"/><ellipse cx="38" cy="148" rx="8" ry="2" fill="#fff" opacity=".6"/>`;
   if(has('mailbox')) s+=R(198,110,3,28,'#8B5A2B')+R(190,102,20,11,'#0057A6','#003a70',4)+R(207,94,2,9,'#E3000B');
   if(has('fence')) [[2,52],[188,238]].forEach(([a,b])=>{ s+=R(a,124,b-a,3,'#fff','#ccc'); for(let x=a;x<b-2;x+=8) s+=R(x,118,5,18,'#fff','#ccc',1) });
@@ -290,7 +290,7 @@ function rainFx(e,host,cx,cy,n){ for(let i=0;i<n;i++){ const s=document.createEl
 
 /* ---------- destination & trip themes ---------- */
 const TH={
- park:{sky:['#7cc8ff','#d4f0ff'],far:'#9cc3e0',mid:'#56b85f',gr:'#3DAE4A',dk:'#2f8f3a',ob:['🪨','🚧','🌵'],deco:['🌳','🌲','🌴'],sun:1},
+ park:{sky:['#7cc8ff','#d4f0ff'],far:'#9cc3e0',mid:'#7fcf6c',gr:'#9ad985',dk:'#6fbf5c',ob:['🪨','🚧','🌵'],deco:['🌳','🌲','🌴'],sun:1},
  volcano:{sky:['#ff8a3d','#ffd08a'],far:'#8a4b2e',mid:'#a8643a',gr:'#6b3e22',dk:'#4a2a16',ob:['🪨','🔥','🦴'],deco:['🌵','🌋','🌵']},
  beach:{sky:['#6fd0ff','#c8f0ff'],far:'#2f8fd8',mid:'#f3d98b',gr:'#e8c46a',dk:'#c9a24a',ob:['🦀','🏰','🐚'],deco:['🌴','⛱️','🌴'],sun:1},
  jungle:{sky:['#79c98a','#d8f5c8'],far:'#2d7a33',mid:'#3fa34a',gr:'#5b3a1e',dk:'#3e2713',ob:['🪵','🍄','🐸'],deco:['🌴','🌿','🦜']},

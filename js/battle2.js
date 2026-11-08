@@ -10,7 +10,7 @@ function rBattle(m){
    <div class="fdinos" style="padding:8px">${P.dinos.map(d=>`<div class="fd ${d.id===B.a||d.id===B.b?'sel':''}" onclick="bPick('${d.id}')">${dinoSVG(d)}<span>${esc(d.name)}</span><span class="mini">🏆${d.st.w}</span></div>`).join('')}</div>
    <div class="row" style="padding-bottom:24px"><button class="brick" style="--c:#E3000B;font-size:28px;padding:14px 26px" ${B.a&&B.b?'':'disabled'} onclick="startFight()">💥 BATTLE!</button><button class="brick" style="--c:#b38f00;font-size:20px" onclick="go('rank')">🏆 Ranking</button></div>`;
 }
-function mkF(d,side){ ensureDino(d); const f=FIGHT[d.species]||FIGHT.trex,bb=d.size==='baby',bonus=1+Math.min(.2,d.st.w*.01); const max=Math.round(200*f.hp*(bb?.9:1)*bonus);
+function mkF(d,side){ ensureDino(d); const f=FIGHT[d.species]||FIGHT.trex,bb=d.size==='baby',bonus=1+Math.min(.2,d.st.w*.01); const max=Math.round(260*f.hp*(bb?.9:1)*bonus);
   return {d,side,hp:max,max,atk:f.atk*bonus,spd:f.spd*(bb?1.15:1),bar:0,cd:.8+Math.random(),stun:0,slow:0,shield:0,buff:0,frozen:0,said:false,ct:0} }
 function startFight(){
   const A=getD(B.a),Bd=getD(B.b); if(!A||!Bd) return; stopLoops(); screen='battle'; closeCard();
@@ -21,7 +21,7 @@ function startFight(){
    <div class="fighter2" id="fa" onpointerdown="cheer('a')"><div class="inner">${dinoSVG(A)}</div></div>
    <div class="fighter2 flipX" id="fb" onpointerdown="cheer('b')"><div class="inner">${dinoSVG(Bd)}</div></div><div class="count" id="count"></div></div>
    <div class="spbtns"><button class="brick spbtn" id="btnA" onclick="useSpecial('a')"><span class="spe">${spA.e}</span><span>${spA.n}</span><small id="pctA">0%</small></button>${B.mode==='2p'?`<button class="brick spbtn" id="btnB" onclick="useSpecial('b')"><span class="spe">${spB.e}</span><span>${spB.n}</span><small id="pctB">0%</small></button>`:''}</div>
-   <p class="center" style="font-size:16px;margin:4px 8px 20px">📣 Tap your dino to cheer! When the ✨ bar is full, press the gold button!</p>`;
+   <p class="center" style="font-size:16px;margin:4px 8px 20px">✨ The bar fills up when dinos hit and get hit. When it is full, press the gold button!</p>`;
   updBT(); let n=3; const cd=()=>{ const c=$('#count'); if(!c||!BT) return; if(n>0){c.textContent=n;SFX.count();say(String(n));n--;setTimeout(cd,900)} else {c.textContent='FIGHT!';SFX.go();say('Fight!');BT.running=true;BT.last=0;setTimeout(()=>{if($('#count'))$('#count').textContent=''},700)} };
   cd(); btRaf=requestAnimationFrame(btStep);
 }
@@ -41,22 +41,23 @@ function fCenter(s){ const ar=$('#arena').getBoundingClientRect(),r=fEl(s).getBo
 function floatTxt(s,t,c){ if(!$('#arena')) return; const p=fCenter(s); const e=document.createElement('div'); e.className='ftxt'; e.textContent=t; if(c) e.style.color=c; e.style.left=p.x+'px'; e.style.top=(p.y-40)+'px'; $('#arena').appendChild(e); setTimeout(()=>e.remove(),1000) }
 function skLabel(s,t){ if(!$('#arena')) return; const p=fCenter(s); const e=document.createElement('div'); e.className='sklbl'; e.textContent=t; e.style.left=p.x+'px'; e.style.top=(p.y-70)+'px'; $('#arena').appendChild(e); setTimeout(()=>e.remove(),1100) }
 function act(s){
-  const F=BT[s],E=BT[s==='a'?'b':'a']; F.cd=(1.7/F.spd)*(F.slow>0?1.5:1)+Math.random()*.5; if(F.slow>0)F.slow--;
+  const F=BT[s],E=BT[s==='a'?'b':'a']; F.cd=(1.4/F.spd)*(F.slow>0?1.5:1)+Math.random()*.3; if(F.slow>0)F.slow--;
   if(F.stun>0){F.stun--; floatTxt(s,'💫 Dizzy!','#FFCD03'); anim(fEl(s),'shake',400); return}
   const sk=skN(rnd(F.d.sk.n)); anim(fEl(s),s==='a'?'lunge-r':'lunge-l',200); skLabel(s,sk.e+' '+sk.n);
-  if(sk.t==='heal'){ heal(F,sk.p); F.bar=Math.min(100,F.bar+7); SFX.hug(); return }
-  if(sk.t==='shield'){ F.shield=4; shieldFx(s); F.bar=Math.min(100,F.bar+7); SFX.pop(); return }
-  if(sk.t==='buff'){ F.buff=2; floatTxt(s,'💪 Power up!','#F57D20'); F.bar=Math.min(100,F.bar+7); SFX.boing(); return }
-  throwProj(s,sk.e,()=>{ if(!BT||BT.over) return; const dmg=sk.p*F.atk*(F.buff>0?1.4:1)*(.85+Math.random()*.3); if(F.buff>0)F.buff--;
+  if(sk.t==='heal'){ heal(F,sk.p); F.bar=Math.min(100,F.bar+12); SFX.hug(); return }
+  if(sk.t==='shield'){ F.shield=4; shieldFx(s); F.bar=Math.min(100,F.bar+12); SFX.pop(); return }
+  if(sk.t==='buff'){ F.buff=2; floatTxt(s,'💪 Power up!','#F57D20'); F.bar=Math.min(100,F.bar+12); SFX.boing(); return }
+  throwProj(s,sk.e,()=>{ if(!BT||BT.over) return; const r=Math.random(); if(r<.07){ floatTxt(E.side,'MISS!','#dfe6ec'); SFX.miss(); anim(fEl(E.side),'dodge',450); F.bar=Math.min(100,F.bar+8); return }
+    const crit=r>.88; const dmg=sk.p*.9*F.atk*(F.buff>0?1.4:1)*(.85+Math.random()*.3)*(crit?1.8:1); if(F.buff>0)F.buff--;
     if(sk.t==='stun') E.stun=1; if(sk.t==='slow'){E.slow=2;floatTxt(E.side,'🐌 Slow!','#5AB4E5')}
-    F.bar=Math.min(100,F.bar+9); E.bar=Math.min(100,E.bar+5); hitF(E,dmg) });
+    F.bar=Math.min(100,F.bar+14); E.bar=Math.min(100,E.bar+10); if(crit) critFx(E.side); hitF(E,dmg,sk.id,crit) });
 }
 function throwProj(s,e,cb){ const ar=$('#arena'); if(!ar) return; const a=fCenter(s),b=fCenter(s==='a'?'b':'a'),dx=b.x-a.x; const p=document.createElement('div'); p.className='proj'; p.textContent=e; p.style.left=a.x+'px'; p.style.top=a.y+'px'; ar.appendChild(p); SFX.whoosh();
   const an=p.animate([{transform:'translate(-50%,-50%) translate(0,0) rotate(0deg)'},{transform:`translate(-50%,-50%) translate(${dx/2}px,-55px) rotate(180deg)`},{transform:`translate(-50%,-50%) translate(${dx}px,0) rotate(360deg)`}],{duration:520});
   an.onfinish=()=>{p.remove();cb()} }
 function shieldFx(s){ const el=fEl(s); if(!el) return; const sh=document.createElement('div'); sh.className='shieldfx'; el.appendChild(sh); setTimeout(()=>sh.remove(),4000); floatTxt(s,'🛡️ Shield!','#5AB4E5') }
 function heal(F,v){ v=Math.round(v); F.hp=Math.min(F.max,F.hp+v); floatTxt(F.side,'+'+v+' 💚','#00A84F') }
-function hitF(E,dmg){ if(!BT||BT.over) return; if(E.shield>0) dmg*=.5; dmg=Math.max(1,Math.round(dmg)); E.hp=Math.max(0,E.hp-dmg); floatTxt(E.side,'-'+dmg,'#E3000B'); anim(fEl(E.side),'shake',420); SFX.bonk(); if(E.hp<=0) endFight(E.side==='a'?'b':'a',true) }
+function hitF(E,dmg,sid,crit){ if(!BT||BT.over) return; if(E.shield>0) dmg*=.5; dmg=Math.max(1,Math.round(dmg)); E.hp=Math.max(0,E.hp-dmg); floatTxt(E.side,(crit?'💥 -':'-')+dmg,crit?'#FFCD03':'#E3000B'); anim(fEl(E.side),'shake',420); sid?SFX.impact(sid,crit):SFX.bonk(); if(E.hp<=0) endFight(E.side==='a'?'b':'a',true) }
 function updBT(){
   if(!BT||!$('#hpA')) return; const q=(id,v)=>{const e=$(id); if(e) e.style.width=v+'%'};
   q('#hpA',BT.a.hp/BT.a.max*100); q('#hpB',BT.b.hp/BT.b.max*100); q('#spA',BT.a.bar); q('#spB',BT.b.bar);
@@ -65,7 +66,7 @@ function updBT(){
   for(const s of ['a','b']){ const b=$(s==='a'?'#btnA':'#btnB'); if(!b) continue; const F=BT[s],ready=F.bar>=100&&BT.running&&!BT.paused&&!BT.over; b.classList.toggle('ready',ready); const pc=$(s==='a'?'#pctA':'#pctB'); if(pc) pc.textContent=ready?'READY!':Math.floor(F.bar)+'%';
     if(ready&&!F.said){F.said=true;say('Special ready! Press the gold button!')} if(!ready&&F.bar<100) F.said=false }
 }
-function cheer(s){ if(!BT||!BT.running||BT.paused||BT.over) return; if(s==='b'&&B.mode==='cpu') return; const F=BT[s],now=Date.now(); if(now-F.ct<180) return; F.ct=now; F.bar=Math.min(100,F.bar+2.5); floatTxt(s,rnd(['❤️','📣','⭐','👏']),'#fff'); tone(880,.05,'triangle',.06) }
+function cheer(s){ if(!BT||!BT.running||BT.over) return; const F=BT[s],now=Date.now(); if(now-F.ct<700) return; F.ct=now; SFX.roar(F.d) }
 function useSpecial(s){
   if(!BT||!BT.running||BT.paused||BT.over) return; const F=BT[s]; if(F.bar<100){ say('Not yet! Cheer to fill the bar!'); return }
   BT.paused=true; F.bar=0; updBT(); const sp=skS(F.d.sk.sp);
@@ -74,13 +75,13 @@ function useSpecial(s){
 function cpuSpecial(){ const F=BT.b; BT.paused=true; F.bar=0; const sp=skS(F.d.sk.sp),g=wPick(); vipIntro(F.d,sp,()=>{ gradeText(g); setTimeout(()=>doSpecial('b',sp,g),600) },true) }
 function doSpecial(s,sp,g){
   if(!BT||BT.over){ if(BT) BT.paused=false; return } const F=BT[s],E=BT[s==='a'?'b':'a'],m=GR[g].m,ar=$('#arena'); if(!ar) return;
-  const p=fCenter(E.side); rainFx(sp.e,ar,p.x,p.y,{Miss:3,Bad:5,Cool:8,Great:11,Perfect:15}[g]); SFX.boom(); anim(ar,'shake',500);
+  const p=fCenter(E.side); rainFx(sp.e,ar,p.x,p.y,{Miss:3,Bad:5,Cool:8,Great:11,Perfect:15}[g]); SFX.boom(); anim(ar,'quake',500);
   if(g==='Perfect'){ const fl=document.createElement('div'); fl.className='flash'; ar.appendChild(fl); setTimeout(()=>fl.remove(),500) }
   setTimeout(()=>{ if(!BT||BT.over) return; BT.paused=false;
-    if(sp.t==='heal'){ heal(F,sp.p*m*1.4); hitF(E,sp.p*.4*m*F.atk) }
-    else if(sp.t==='stun'){ if(m>=.8){E.stun=2;floatTxt(E.side,'💫 Dizzy!','#FFCD03')} hitF(E,sp.p*m*F.atk) }
-    else if(sp.t==='freeze'){ E.frozen=1+2*m; fEl(E.side).classList.add('frozen'); hitF(E,sp.p*m*F.atk) }
-    else hitF(E,sp.p*m*F.atk);
+    if(sp.t==='heal'){ heal(F,sp.p*m*2.2); hitF(E,sp.p*1.2*m*F.atk,'special',m>=1.1) }
+    else if(sp.t==='stun'){ if(m>=.8){E.stun=2;floatTxt(E.side,'💫 Dizzy!','#FFCD03')} hitF(E,sp.p*2.4*m*F.atk,'special',m>=1.1) }
+    else if(sp.t==='freeze'){ E.frozen=1+2*m; fEl(E.side).classList.add('frozen'); hitF(E,sp.p*2.4*m*F.atk,'special',m>=1.1) }
+    else hitF(E,sp.p*2.4*m*F.atk,'special',m>=1.1);
   },1000);
 }
 function endFight(w,ko){

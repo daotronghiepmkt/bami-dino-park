@@ -104,7 +104,7 @@ function gBuy(i){ const G=GD,c=G.cards[i]; if(!c.unit||G.leaves<100||c.sp>=100) 
 function gSpecial(i){ const G=GD; if(!G||G.paused||G.over) return; const c=G.cards[i]; if(!c.unit||c.sp<100) return; G.paused=true; c.sp=0; gCards(true); const sp=skS(c.d.sk.sp),u=c.unit;
   vipIntro(c.d,sp,()=>skillGame(sp,g=>{ if(g==='Perfect'){c.d.st.perf++;save()} gApply(u,sp,g) }),false) }
 function gApply(u,sp,g){ const G=GD; if(!G) return; const m=GR[g].m,all=['meteor','thunder','quake','tsunami','meatrain','iceage','megaroar'].includes(sp.id),lanes=all?[0,1,2]:[u.r],f=$('#gf');
-  if(f){ const W=f.clientWidth,H=f.clientHeight; lanes.forEach(r=>{ for(let k=0;k<3;k++) rainFx(sp.e,f,W*(.45+k*.2),H*(r*LANE+18)/100,{Miss:1,Bad:2,Cool:3,Great:4,Perfect:5}[g]) }); anim(f,'shake',500) } SFX.boom();
+  if(f){ const W=f.clientWidth,H=f.clientHeight; lanes.forEach(r=>{ for(let k=0;k<3;k++) rainFx(sp.e,f,W*(.45+k*.2),H*(r*LANE+18)/100,{Miss:1,Bad:2,Cool:3,Great:4,Perfect:5}[g]) }); anim(f,'quake',500) } SFX.boom();
   setTimeout(()=>{ if(!GD) return; G.paused=false;
     G.bots.filter(b=>lanes.includes(b.r)).forEach(b=>{ if(sp.t==='heal') bHit(b,20*m); else { if(sp.t==='stun'||sp.t==='freeze') b.stun=2+2*m; bHit(b,sp.p*3*m*u.atk*(all?.7:1)) } });
     if(sp.t==='heal') G.units.forEach(x=>{x.hp=Math.min(x.max,x.hp+x.max*.6*m);gFloat(x.x,x.r*LANE+8,'💚')});

@@ -217,3 +217,32 @@
 .kidg{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
 .kt{width:62px;margin:0 auto}
 #hCoins{font-size:16px}
+/* ---- v3 ---- */
+.ground,.baseplate{background-color:#9ad985!important;background-image:radial-gradient(circle,rgba(255,255,255,.45) 0 4px,rgba(60,130,40,.14) 4.5px 6px,transparent 6.5px)!important}
+.scene.night .ground{filter:brightness(.7)}
+.arena2 .ground{background-color:#b7e3a6!important}
+.gfield{background:#c4ecb4}
+.glane{background-color:#c4ecb4;background-image:radial-gradient(circle,rgba(255,255,255,.55) 0 4px,rgba(60,130,40,.10) 4.5px 6px,transparent 6.5px);border-bottom:3px dashed rgba(255,255,255,.8)}
+.glane.alt{background-color:#b5e5a2}
+.gnest{background:rgba(205,160,110,.45)}
+.gunit{pointer-events:auto;cursor:pointer}
+.gunit.ready{animation:rglow .7s infinite alternate;z-index:8}
+.gunit.ready::after{content:'✨ TAP!';position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:#FFCD03;color:#5a3a00;font-weight:700;font-size:12px;padding:1px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 0 10px #FFCD03}
+@keyframes rglow{from{filter:drop-shadow(0 0 4px #FFCD03)}to{filter:drop-shadow(0 0 14px #FFCD03) drop-shadow(0 0 6px #fff) brightness(1.15)}}
+.flash.y{background:radial-gradient(circle,rgba(255,236,120,.9),rgba(255,205,3,.3))}
+.dbub{position:absolute;left:50%;top:-6px;transform:translate(-50%,-100%);background:#fff;border:3px solid #222;border-radius:16px;padding:3px 9px;display:flex;align-items:center;gap:5px;white-space:nowrap;z-index:60;box-shadow:0 3px 0 rgba(0,0,0,.2);animation:bub 2.2s forwards;pointer-events:none;font-weight:700;font-size:13px;max-width:260px}
+.dbub::after{content:'';position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border:7px solid transparent;border-top-color:#222}
+.dbub b{font-size:26px;line-height:1}
+.dbub span{white-space:normal;line-height:1.15}
+@keyframes bub{0%{transform:translate(-50%,-80%) scale(.3);opacity:0}12%{transform:translate(-50%,-100%) scale(1.08);opacity:1}85%{opacity:1}100%{transform:translate(-50%,-115%);opacity:0}}
+.fd,.bigwrap,.hmem{position:relative}
+.gunit .dbub{font-size:11px;padding:2px 6px}.gunit .dbub b{font-size:22px}
+.dance{animation:dance .7s}
+@keyframes dance{20%{transform:rotate(-12deg) translateY(-6px)}40%{transform:rotate(12deg)}60%{transform:rotate(-12deg) translateY(-6px)}80%{transform:rotate(8deg)}}
+.spin{animation:spin3 .7s}
+@keyframes spin3{50%{transform:translateY(-30px) rotate(180deg)}100%{transform:rotate(360deg)}}
+.dodge{animation:dodge .45s}
+@keyframes dodge{40%{transform:translateY(-26px) scale(.95)}}
+.dbub{width:max-content;max-width:min(230px,78vw)}
+.quake{animation:quake .45s}
+@keyframes quake{20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(4px,-2px)}}
