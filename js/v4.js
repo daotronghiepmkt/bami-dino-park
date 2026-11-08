@@ -84,3 +84,32 @@ Object.assign(vSVG,{
    +`<path d="M186 56 l3 -7 l3 7 l-3 7 Z" fill="#FFCD03"><animate attributeName="opacity" values="1;.2;1" dur=".8s" repeatCount="indefinite"/></path><path d="M6 40 l2 -5 l2 5 l-2 5 Z" fill="#fff"><animate attributeName="opacity" values=".2;1;.2" dur="1s" repeatCount="indefinite"/></path>`
    +Cc(170,48,4,'#FFCD03','#b38f00')+Cc(164,52,3.5,'#FFCD03','#b38f00')
 });
+
+/* v6: shorter sleigh pulled by a reindeer, with an original Christmas elf sitting behind Bami */
+VEH.sleigh=Object.assign(VEH.sleigh,{seats:[[0,47],[11,49]],sw:15,dl:31,db:49,dw:13});
+vSVG.sleigh=()=>{
+  const leg=(x,d)=>`<rect x="${x}" y="66" width="5" height="20" rx="2" fill="#7a4a23" stroke="#4e2e14" stroke-width=".8"><animateTransform attributeName="transform" type="rotate" values="-22 ${x+2.5} 66;22 ${x+2.5} 66;-22 ${x+2.5} 66" dur=".5s" begin="${d}s" repeatCount="indefinite"/></rect>`;
+  let s='';
+  /* reindeer */
+  s+=leg(138,0)+leg(146,-.25)+leg(168,-.12)+leg(176,-.37);
+  s+=`<rect x="132" y="48" width="50" height="22" rx="9" fill="#8B5A2B" stroke="#4e2e14" stroke-width="1.2"/><ellipse cx="156" cy="64" rx="16" ry="5" fill="#d9b48a"/><circle cx="131" cy="52" r="4" fill="#fff"/>`;
+  s+=`<rect x="172" y="30" width="11" height="24" rx="4" fill="#8B5A2B" stroke="#4e2e14" stroke-width="1.2" transform="rotate(12 177 42)"/><rect x="172" y="20" width="22" height="15" rx="6" fill="#8B5A2B" stroke="#4e2e14" stroke-width="1.2"/>`;
+  s+=`<path d="M176 21 L170 8 M173 14 L166 12 M182 20 L186 6 M185 12 L192 10" stroke="#c7955a" stroke-width="2.6" stroke-linecap="round" fill="none"/><ellipse cx="173" cy="24" rx="4" ry="2.2" fill="#6b3f1c" transform="rotate(-30 173 24)"/>`;
+  s+=`<circle cx="195" cy="28" r="3.6" fill="#E3000B"><animate attributeName="r" values="3.6;4.3;3.6" dur="1s" repeatCount="indefinite"/></circle><circle cx="186" cy="25" r="2" fill="#222"/><circle cx="186.6" cy="24.4" r=".7" fill="#fff"/><path d="M190 32 q2 2 4 0" stroke="#4e2e14" stroke-width="1" fill="none"/>`;
+  s+=`<rect x="150" y="47" width="5" height="24" fill="#E3000B"/><rect x="170" y="38" width="10" height="4" rx="2" fill="#E3000B" transform="rotate(12 175 40)"/>`+[54,60,66].map(y=>Cc(152.5,y,2.4,'#FFCD03','#b38f00',.6)).join('');
+  /* harness */
+  s+=`<path d="M100 62 Q118 56 152 58" stroke="#E3000B" stroke-width="2.4" fill="none"/>`+Cc(120,58,2.4,'#FFCD03','#b38f00',.6)+Cc(136,57,2.4,'#FFCD03','#b38f00',.6);
+  /* original elf (behind Bami) */
+  s+=R(37,48,26,10,'#2d9a3e','#1a5a26',4)+`<polygon points="40,40 33,34 40,46" fill="#FFD93B" stroke="#c9a200"/><polygon points="60,40 67,34 60,46" fill="#FFD93B" stroke="#c9a200"/>`+Cc(50,41,11,'#FFD93B','#c9a200');
+  
+  s+=`<path d="M38 34 Q44 14 60 16 Q70 18 74 30 L67 28 Q60 22 62 34 Z" fill="#2d9a3e" stroke="#1a5a26"/>`+R(37,31,26,5,'#fff','#ccc',2.5)+Cc(74,31,3.2,'#FFCD03','#b38f00',.8);
+  s+=Cc(45.5,40,3,'#fff','#222',.8)+Cc(54.5,40,3,'#fff','#222',.8)+Cc(46.2,40.3,1.5,'#222')+Cc(55.2,40.3,1.5,'#222')+Cc(46.7,39.6,.5,'#fff')+Cc(55.7,39.6,.5,'#fff')+Cc(42.5,45,1.8,'#ffab91')+Cc(57.5,45,1.8,'#ffab91')+`<path d="M46.5 46 Q50 50 53.5 46 Z" fill="#fff" stroke="#222" stroke-width="1"/>`;
+  s+=`<polygon points="38,51 42,55 46,51 50,55 54,51 58,55 62,51 62,49 38,49" fill="#fff" stroke="#ddd" stroke-width=".6"/>`;
+  /* sleigh (short) */
+  s+=`<path d="M4 98 H92 Q110 98 108 82" stroke="#E8B923" stroke-width="5" fill="none" stroke-linecap="round"/>`+[26,70].map(x=>`<line x1="${x}" y1="86" x2="${x}" y2="98" stroke="#E8B923" stroke-width="4"/>`).join('');
+  s+=`<path d="M8 54 Q6 88 30 88 L82 88 Q102 88 104 66 Q106 46 94 44 L84 54 Z" fill="#d7261e" stroke="#8a1410" stroke-width="1.5"/>`+R(8,50,80,6,'#00A84F','#00733a',3)+[16,30,44,58,72].map(x=>Cc(x,53,1.7,'#FFCD03')).join('');
+  s+=`<path d="M18 70 Q34 63 50 70 T84 70" stroke="#FFCD03" stroke-width="2.5" fill="none"/>`;
+  s+=`<path d="M98 64 V34 Q98 24 88 26 Q82 28 84 34" stroke="#fff" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M98 64 V34 Q98 24 88 26 Q82 28 84 34" stroke="#E3000B" stroke-width="4.5" fill="none" stroke-dasharray="4 4"/>`;
+  s+=`<path d="M112 40 l3 -7 l3 7 l-3 7 Z" fill="#FFCD03"><animate attributeName="opacity" values="1;.2;1" dur=".8s" repeatCount="indefinite"/></path><path d="M124 26 l2 -5 l2 5 l-2 5 Z" fill="#fff"><animate attributeName="opacity" values=".2;1;.2" dur="1s" repeatCount="indefinite"/></path>`;
+  return s;
+};
